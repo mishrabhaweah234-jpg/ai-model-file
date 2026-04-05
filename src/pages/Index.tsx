@@ -1,16 +1,34 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import Navbar from '@/components/Navbar';
+import HeroSection from '@/components/HeroSection';
+import StatsRow from '@/components/StatsRow';
+import TryOnStudio from '@/components/TryOnStudio';
+import CatalogSection from '@/components/CatalogSection';
+import NewArrivals from '@/components/NewArrivals';
+import Footer from '@/components/Footer';
+import CartSidebar from '@/components/CartSidebar';
+import AuthModal from '@/components/AuthModal';
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <>
+      <div className="page-glow top-24 -left-36" style={{ background: 'rgba(255,199,95,0.84)' }} />
+      <div className="page-glow top-[28rem] -right-32" style={{ background: 'rgba(20,108,127,0.34)' }} />
+
+      <div className="w-full max-w-[1320px] mx-auto px-4">
+        <Navbar />
+        <HeroSection />
+        <StatsRow />
+        <TryOnStudio />
+        <CatalogSection audience="Men" eyebrow="Men" title="Structured street and elevated basics" subtitle="Quick view style cards with hover motion." />
+        <CatalogSection audience="Women" eyebrow="Women" title="Fluid silhouettes with bold accents" subtitle="Designed with a softer editorial tone." />
+        <NewArrivals />
+        <Footer />
+      </div>
+
+      <CartSidebar />
+      <AuthModal />
+    </>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
