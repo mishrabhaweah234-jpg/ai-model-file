@@ -17,6 +17,9 @@ interface AppState {
   authOpen: boolean;
   authMode: 'login' | 'signup';
   searchQuery: string;
+  userPhoto: string | null;
+  isGenerating: boolean;
+  generatedImage: string | null;
 
   addToBag: (id: string) => void;
   removeFromBag: (id: string) => void;
@@ -27,6 +30,9 @@ interface AppState {
   setAuthOpen: (open: boolean) => void;
   setAuthMode: (mode: 'login' | 'signup') => void;
   setSearchQuery: (q: string) => void;
+  setUserPhoto: (photo: string | null) => void;
+  setIsGenerating: (v: boolean) => void;
+  setGeneratedImage: (img: string | null) => void;
   surpriseMe: () => void;
   bagTotal: () => number;
   findProduct: (id: string) => Product | undefined;
@@ -41,16 +47,22 @@ export const useStore = create<AppState>((set, get) => ({
   authOpen: false,
   authMode: 'login',
   searchQuery: '',
+  userPhoto: null,
+  isGenerating: false,
+  generatedImage: null,
 
   addToBag: (id) => set((s) => ({ bag: [id, ...s.bag], cartOpen: true })),
   removeFromBag: (id) => set((s) => ({ bag: s.bag.filter((b) => b !== id) })),
-  setTryOn: (category, id) => set((s) => ({ tryOn: { ...s.tryOn, [category]: id } })),
+  setTryOn: (category, id) => set((s) => ({ tryOn: { ...s.tryOn, [category]: id }, generatedImage: null })),
   setTone: (tone) => set({ selectedTone: tone }),
   setBackdrop: (id) => set({ selectedBackdrop: id }),
   setCartOpen: (open) => set({ cartOpen: open }),
   setAuthOpen: (open) => set({ authOpen: open }),
   setAuthMode: (mode) => set({ authMode: mode }),
   setSearchQuery: (q) => set({ searchQuery: q }),
+  setUserPhoto: (photo) => set({ userPhoto: photo, generatedImage: null }),
+  setIsGenerating: (v) => set({ isGenerating: v }),
+  setGeneratedImage: (img) => set({ generatedImage: img }),
   surpriseMe: () => {
     const tops = products.filter(p => p.category === 'Top');
     const bottoms = products.filter(p => p.category === 'Bottom');
@@ -63,7 +75,8 @@ export const useStore = create<AppState>((set, get) => ({
         bottom: rand(bottoms).id,
         shoes: rand(shoes).id,
         bag: rand(bags).id,
-      }
+      },
+      generatedImage: null,
     });
   },
   bagTotal: () => get().bag.reduce((t, id) => t + (products.find(p => p.id === id)?.price || 0), 0),
