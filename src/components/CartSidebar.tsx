@@ -33,7 +33,7 @@ const CartSidebar = () => {
           ) : (
             bagProducts.map((p, i) => (
               <article key={`${p!.id}-${i}`} className="flex items-center gap-3 glass-surface !rounded-2xl p-3">
-                <div className="w-12 h-12 rounded-xl flex-shrink-0" style={{ background: p!.background }} />
+                <img src={p!.image} alt={p!.name} className="w-12 h-12 rounded-xl flex-shrink-0 object-contain bg-muted/30" loading="lazy" />
                 <div className="flex-1 min-w-0">
                   <strong className="text-sm block truncate">{p!.name}</strong>
                   <p className="text-xs text-muted-foreground">{p!.brand} | Qty 1</p>

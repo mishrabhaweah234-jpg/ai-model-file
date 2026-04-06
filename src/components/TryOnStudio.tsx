@@ -183,7 +183,7 @@ const TryOnStudio = () => {
                       : 'border-border bg-card hover:bg-muted'
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-lg mb-1.5" style={{ background: p.background }} />
+                  <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg mb-1.5 object-contain" loading="lazy" />
                   <strong className="block truncate">{p.name}</strong>
                   <span className="text-muted-foreground">{p.category}</span>
                 </button>
