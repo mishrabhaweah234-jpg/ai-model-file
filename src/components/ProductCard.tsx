@@ -16,11 +16,15 @@ const ProductCard = ({ product, feminine }: Props) => {
 
   return (
     <article className="glass-surface !rounded-3xl overflow-hidden group">
-      <div className="relative h-48 flex items-center justify-center p-4" style={{ background: product.background }}>
-        <span className="badge-tag absolute top-3 left-3 text-xs">{product.badge}</span>
-        <div
-          className={`w-20 h-20 rounded-2xl opacity-60 group-hover:scale-110 transition-transform duration-300`}
-          style={{ background: product.background }}
+      <div className="relative h-48 flex items-center justify-center p-4 overflow-hidden" style={{ background: product.background }}>
+        <span className="badge-tag absolute top-3 left-3 text-xs z-10">{product.badge}</span>
+        <img
+          src={product.image}
+          alt={product.name}
+          loading="lazy"
+          width={512}
+          height={512}
+          className="w-32 h-32 object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-lg"
         />
       </div>
       <div className="p-5">
