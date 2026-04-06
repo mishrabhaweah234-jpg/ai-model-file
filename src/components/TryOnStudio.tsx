@@ -1,6 +1,8 @@
 import { useRef, useCallback, useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { products, skinTones, backdrops } from '@/data/products';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const TryOnStudio = () => {
   const {
