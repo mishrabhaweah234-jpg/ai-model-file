@@ -80,15 +80,43 @@ const TryOnStudio = () => {
     setCameraActive(false);
   };
 
-  const handleGenerateTryOn = () => {
+  const handleGenerateTryOn = async () => {
     if (!userPhoto || selected.length === 0) return;
     setIsGenerating(true);
     setGeneratedImage(null);
-    // Simulate AI generation (replace with real AI call later)
-    setTimeout(() => {
-      setGeneratedImage(userPhoto); // placeholder — real AI would return a modified image
+
+    try {
+      const selectedItems = selected.map(p => ({
+        name: p!.name,
+        category: p!.category,
+        description: p!.description,
+      }));
+
+      const { data, error } = await supabase.functions.invoke('generate-tryon', {
+        body: { userPhoto, selectedItems },
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Generation failed');
+      }
+
+      if (data?.error) {
+        toast({ title: 'Try-On Error', description: data.error, variant: 'destructive' });
+        return;
+      }
+
+      if (data?.image) {
+        setGeneratedImage(data.image);
+        toast({ title: '✨ Try-On Ready!', description: 'Your AI-generated outfit preview is ready.' });
+      } else {
+        toast({ title: 'No image generated', description: 'AI could not produce an image. Try a clearer full-body photo.', variant: 'destructive' });
+      }
+    } catch (err: any) {
+      console.error('Try-on generation error:', err);
+      toast({ title: 'Generation Failed', description: err.message || 'Something went wrong. Please try again.', variant: 'destructive' });
+    } finally {
       setIsGenerating(false);
-    }, 2500);
+    }
   };
 
   const canGenerate = !!userPhoto && selected.length > 0;
