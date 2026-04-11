@@ -1,5 +1,6 @@
 import type { Product } from '@/data/products';
 import { useStore } from '@/store/useStore';
+import { Link } from 'react-router-dom';
 
 interface Props {
   product: Product;
@@ -16,19 +17,21 @@ const ProductCard = ({ product, feminine }: Props) => {
 
   return (
     <article className="glass-surface !rounded-3xl overflow-hidden group">
-      <div className="relative h-48 flex items-center justify-center p-4 overflow-hidden" style={{ background: product.background }}>
-        <span className="badge-tag absolute top-3 left-3 text-xs z-10">{product.badge}</span>
-        <img
-          src={product.image}
-          alt={product.name}
-          loading="lazy"
-          width={512}
-          height={512}
-          className="w-32 h-32 object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-lg"
-        />
-      </div>
+      <Link to={`/product/${product.id}`}>
+        <div className="relative h-48 flex items-center justify-center p-4 overflow-hidden" style={{ background: product.background }}>
+          <span className="badge-tag absolute top-3 left-3 text-xs z-10">{product.badge}</span>
+          <img
+            src={product.image}
+            alt={product.name}
+            loading="lazy"
+            width={512}
+            height={512}
+            className="w-32 h-32 object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-lg"
+          />
+        </div>
+      </Link>
       <div className="p-5">
-        <h4 className="font-display text-lg">{product.name}</h4>
+        <Link to={`/product/${product.id}`}><h4 className="font-display text-lg hover:text-primary transition-colors">{product.name}</h4></Link>
         <span className="text-xs text-muted-foreground">{product.brand}</span>
         <p className="text-sm text-muted-foreground mt-2">{product.description}</p>
         <div className="flex items-center justify-between mt-3">
