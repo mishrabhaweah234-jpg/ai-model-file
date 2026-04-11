@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import logo from '@/assets/logo.jpeg';
+import ThemeSwitcher from './ThemeSwitcher';
 
 const Navbar = () => {
   const { bag, setCartOpen, setAuthOpen, searchQuery, setSearchQuery } = useStore();
@@ -24,7 +25,8 @@ const Navbar = () => {
           <a href="#studio" className="text-primary font-extrabold">Try-On Studio</a>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher />
           <label className="hidden sm:grid gap-1 min-w-[200px] lg:min-w-[280px]">
             <input
               type="search"
