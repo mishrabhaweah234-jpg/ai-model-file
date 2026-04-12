@@ -19,8 +19,9 @@ const Index = () => {
 
   return (
     <>
-      <div className="page-glow top-24 -left-36" style={{ background: 'rgba(255,199,95,0.84)' }} />
-      <div className="page-glow top-[28rem] -right-32" style={{ background: 'rgba(20,108,127,0.34)' }} />
+      <div className="page-glow top-24 -left-36" style={{ background: 'hsl(var(--sun) / 0.6)' }} />
+      <div className="page-glow top-[28rem] -right-32" style={{ background: 'hsl(var(--teal) / 0.25)' }} />
+      <div className="page-glow top-[60rem] left-1/2" style={{ background: 'hsl(var(--pink) / 0.2)' }} />
 
       <div className="w-full max-w-[1320px] mx-auto px-4">
         <Navbar />
@@ -28,10 +29,10 @@ const Index = () => {
         <div ref={statsRef}><StatsRow /></div>
         <div ref={studioRef}><TryOnStudio /></div>
         <div ref={menRef}>
-          <CatalogSection audience="Men" eyebrow="Men" title="Structured street and elevated basics" subtitle="Quick view style cards with hover motion." />
+          <CatalogSection audience="Men" eyebrow="Men's Collection" title="Structured street & elevated basics" subtitle="Style cards with hover motion." />
         </div>
         <div ref={womenRef}>
-          <CatalogSection audience="Women" eyebrow="Women" title="Fluid silhouettes with bold accents" subtitle="Designed with a softer editorial tone." />
+          <CatalogSection audience="Women" eyebrow="Women's Collection" title="Fluid silhouettes with bold accents" subtitle="Softer editorial tone." />
         </div>
         <div ref={arrivalsRef}><NewArrivals /></div>
         <div ref={footerRef}><Footer /></div>
