@@ -1,6 +1,13 @@
 import { useStore } from '@/store/useStore';
 import { products, heroSlides } from '@/data/products';
 
+const stats = [
+  { icon: '📦', gradient: false },
+  { icon: '👗', gradient: false },
+  { icon: '💰', gradient: false },
+  { icon: '✨', gradient: true },
+];
+
 const StatsRow = () => {
   const { searchQuery, tryOn, bagTotal } = useStore();
   const query = searchQuery.toLowerCase();
@@ -9,20 +16,30 @@ const StatsRow = () => {
   ).length;
   const activePieces = Object.values(tryOn).filter(Boolean).length;
 
+  const data = [
+    { label: 'Products live', value: String(count) },
+    { label: 'Try-on looks', value: activePieces ? `${activePieces} piece look` : 'Studio ready' },
+    { label: 'Bag total', value: `Rs ${bagTotal().toLocaleString()}` },
+    { label: 'Featured theme', value: heroSlides[0].title },
+  ];
+
   return (
-    <div className="flex gap-4 mt-4 flex-wrap">
-      {[
-        { label: 'Products live', value: String(count) },
-        { label: 'Try-on looks', value: activePieces ? `${activePieces} piece look` : 'Studio ready' },
-        { label: 'Bag total', value: `Rs ${bagTotal()}` },
-        { label: 'Featured theme', value: heroSlides[0].title, accent: true },
-      ].map((stat) => (
+    <div className="flex gap-4 mt-5 flex-wrap">
+      {data.map((stat, i) => (
         <article
           key={stat.label}
-          className={`glass-surface flex-1 min-w-[200px] !rounded-3xl p-5 ${stat.accent ? 'bg-gradient-to-br from-sun/40 to-card' : ''}`}
+          className={`glass-surface flex-1 min-w-[180px] !rounded-3xl p-5 hover:-translate-y-1 transition-all duration-300 group ${
+            stats[i].gradient ? 'relative overflow-hidden' : ''
+          }`}
         >
-          <span className="eyebrow">{stat.label}</span>
-          <strong className="block mt-1 text-2xl font-display">{stat.value}</strong>
+          {stats[i].gradient && (
+            <div className="absolute inset-0 bg-gradient-to-br from-sun/20 to-transparent pointer-events-none" />
+          )}
+          <div className="flex items-center gap-2 relative">
+            <span className="text-lg">{stats[i].icon}</span>
+            <span className="eyebrow">{stat.label}</span>
+          </div>
+          <strong className="block mt-2 text-2xl font-display relative group-hover:text-primary transition-colors">{stat.value}</strong>
         </article>
       ))}
     </div>
