@@ -7,17 +7,20 @@ const NewArrivals = () => {
   const arrivals = arrivalIds.map((id) => products.find((p) => p.id === id)!).filter(Boolean);
 
   return (
-    <section id="new-arrivals" className="glass-surface !rounded-3xl p-6 md:p-8 mt-5">
-      <div className="flex justify-between items-end mb-6">
+    <section id="new-arrivals" className="glass-surface !rounded-[2rem] p-6 md:p-10 mt-5">
+      <div className="flex justify-between items-end mb-8 flex-wrap gap-3">
         <div>
           <p className="eyebrow">New arrivals</p>
-          <h3 className="font-display text-2xl md:text-3xl">Trending edit</h3>
+          <h3 className="font-display text-3xl md:text-4xl tracking-tight mt-1">Trending <em className="text-gradient-hero not-italic">edit</em></h3>
         </div>
-        <span className="text-sm text-muted-foreground">Scroll to explore →</span>
+        <span className="text-sm text-muted-foreground flex items-center gap-2">
+          <span className="w-8 h-px bg-foreground/20" />
+          Scroll to explore →
+        </span>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-3 no-scrollbar snap-x snap-mandatory">
+      <div className="flex gap-4 overflow-x-auto pb-3 no-scrollbar snap-x snap-mandatory -mx-2 px-2">
         {arrivals.map((p) => (
-          <article key={p.id} className="glass-surface !rounded-3xl min-w-[260px] flex-shrink-0 overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 snap-start">
+          <article key={p.id} className="glass-surface !rounded-[1.5rem] min-w-[260px] flex-shrink-0 overflow-hidden group card-hover snap-start">
             <Link to={`/product/${p.id}`}>
               <div className="h-40 flex items-center justify-center relative overflow-hidden" style={{ background: p.background }}>
                 <span className="badge-tag absolute top-3 left-3 text-xs z-10">🔥 Fresh</span>
