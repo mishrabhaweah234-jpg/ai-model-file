@@ -24,22 +24,21 @@ const StatsRow = () => {
   ];
 
   return (
-    <div className="flex gap-4 mt-5 flex-wrap">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
       {data.map((stat, i) => (
         <article
           key={stat.label}
-          className={`glass-surface flex-1 min-w-[180px] !rounded-3xl p-5 hover:-translate-y-1 transition-all duration-300 group ${
-            stats[i].gradient ? 'relative overflow-hidden' : ''
-          }`}
+          className={`glass-surface !rounded-2xl p-5 card-hover group relative overflow-hidden`}
         >
           {stats[i].gradient && (
-            <div className="absolute inset-0 bg-gradient-to-br from-sun/20 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-br from-sun/25 via-transparent to-transparent pointer-events-none" />
           )}
+          <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-primary/5 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className="flex items-center gap-2 relative">
-            <span className="text-lg">{stats[i].icon}</span>
-            <span className="eyebrow">{stat.label}</span>
+            <span className="text-base opacity-80">{stats[i].icon}</span>
+            <span className="eyebrow !text-[10px]">{stat.label}</span>
           </div>
-          <strong className="block mt-2 text-2xl font-display relative group-hover:text-primary transition-colors">{stat.value}</strong>
+          <strong className="block mt-2 text-xl lg:text-2xl font-display relative group-hover:text-primary transition-colors tracking-tight">{stat.value}</strong>
         </article>
       ))}
     </div>

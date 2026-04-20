@@ -9,7 +9,7 @@ const Navbar = () => {
   const [searchFocused, setSearchFocused] = useState(false);
 
   return (
-    <header className="glass-surface sticky top-4 z-20 w-full max-w-[1320px] mx-auto px-5 py-3.5 rounded-3xl transition-shadow duration-300 hover:shadow-lg">
+    <header className="glass-surface sticky top-4 z-20 w-full max-w-[1320px] mx-auto px-5 py-3 !rounded-2xl transition-all duration-300 hover:shadow-lg">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 group cursor-pointer">
           <img src={logo} alt="ModeMuse Logo" className="w-11 h-11 rounded-2xl object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all" />
