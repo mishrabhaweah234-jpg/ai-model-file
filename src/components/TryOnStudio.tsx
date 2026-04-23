@@ -89,6 +89,9 @@ const TryOnStudio = () => {
     if (!userPhoto || selected.length === 0) return;
     setIsGenerating(true);
     setGeneratedImage(null);
+    setAngleViews({});
+    setAngle('front');
+    setZoom(1);
 
     try {
       const selectedItems = selected.map(p => ({
@@ -98,7 +101,7 @@ const TryOnStudio = () => {
       }));
 
       const { data, error } = await supabase.functions.invoke('generate-tryon', {
-        body: { userPhoto, selectedItems },
+        body: { userPhoto, selectedItems, angle: 'front' },
       });
 
       if (error) {
@@ -112,6 +115,7 @@ const TryOnStudio = () => {
 
       if (data?.image) {
         setGeneratedImage(data.image);
+        setAngleViews({ front: data.image });
         toast({ title: '✨ Try-On Ready!', description: 'Your AI-generated outfit preview is ready.' });
       } else {
         toast({ title: 'No image generated', description: 'AI could not produce an image. Try a clearer full-body photo.', variant: 'destructive' });
@@ -124,6 +128,44 @@ const TryOnStudio = () => {
     }
   };
 
+  const handleGenerateAngle = async (targetAngle: 'three-quarter' | 'side' | 'back') => {
+    if (!generatedImage || !userPhoto || selected.length === 0) return;
+    if (angleViews[targetAngle]) {
+      setAngle(targetAngle);
+      return;
+    }
+    setLoadingAngle(targetAngle);
+    try {
+      const selectedItems = selected.map(p => ({
+        name: p!.name,
+        category: p!.category,
+        description: p!.description,
+      }));
+      const { data, error } = await supabase.functions.invoke('generate-tryon', {
+        body: {
+          userPhoto,
+          selectedItems,
+          angle: targetAngle,
+          baseImage: angleViews.front || generatedImage,
+        },
+      });
+      if (error) throw new Error(error.message || 'Angle generation failed');
+      if (data?.error) {
+        toast({ title: 'Angle Error', description: data.error, variant: 'destructive' });
+        return;
+      }
+      if (data?.image) {
+        setAngleViews(prev => ({ ...prev, [targetAngle]: data.image }));
+        setAngle(targetAngle);
+      }
+    } catch (err: any) {
+      toast({ title: 'Angle Failed', description: err.message || 'Something went wrong.', variant: 'destructive' });
+    } finally {
+      setLoadingAngle(null);
+    }
+  };
+
+  const currentImage = angleViews[angle] || generatedImage;
   const canGenerate = !!userPhoto && selected.length > 0;
 
   return (
