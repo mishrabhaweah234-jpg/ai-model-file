@@ -374,8 +374,8 @@ const TryOnStudio = () => {
                   </button>
                 </div>
 
-                {/* Angle picker — bottom */}
-                <div className="absolute bottom-4 left-4 right-4 z-10 bg-card/80 backdrop-blur-md rounded-full px-2 py-1.5 shadow-md border border-border/50 flex items-center justify-center gap-1 flex-wrap">
+                {/* Angle picker — left side, vertical */}
+                <div className="absolute top-1/2 left-4 -translate-y-1/2 z-10 bg-card/80 backdrop-blur-md rounded-full px-1.5 py-2 shadow-md border border-border/50 flex flex-col items-stretch gap-1">
                   {([
                     { id: 'front', label: 'Front' },
                     { id: 'three-quarter', label: '3/4' },
