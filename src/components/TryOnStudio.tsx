@@ -15,7 +15,10 @@ const TryOnStudio = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
+  const [angle, setAngle] = useState<'front' | 'three-quarter' | 'side' | 'back'>('front');
+  const [angleViews, setAngleViews] = useState<Record<string, string>>({});
+  const [loadingAngle, setLoadingAngle] = useState<string | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const top = tryOn.top ? products.find(p => p.id === tryOn.top) : null;
   const bottom = tryOn.bottom ? products.find(p => p.id === tryOn.bottom) : null;
