@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { userPhoto, selectedItems } = await req.json();
+    const { userPhoto, selectedItems, angle = "front", baseImage } = await req.json();
 
     if (!userPhoto || !selectedItems || selectedItems.length === 0) {
       return new Response(
