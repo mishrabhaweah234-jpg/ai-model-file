@@ -325,16 +325,20 @@ const TryOnStudio = () => {
               <div className="relative w-full h-full flex flex-col items-center">
                 <div className="relative mt-8 overflow-hidden rounded-2xl max-h-[340px]">
                   <img
-                    src={generatedImage}
-                    alt="AI Try-On Result"
+                    src={currentImage!}
+                    alt={`AI Try-On Result — ${angle} view`}
                     className="max-h-[340px] rounded-2xl object-cover shadow-lg transition-transform duration-300 ease-out will-change-transform"
-                    style={{
-                      transform: `scale(${zoom}) perspective(1000px) rotateY(${rotation}deg)`,
-                    }}
+                    style={{ transform: `scale(${zoom})` }}
                   />
+                  {loadingAngle && (
+                    <div className="absolute inset-0 bg-background/70 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-2">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-peach to-coral flex items-center justify-center text-2xl animate-pulse">✨</div>
+                      <span className="text-xs font-medium">Generating {loadingAngle} view…</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Zoom controls — top right corner */}
+                {/* Zoom + fullscreen controls — top right corner */}
                 <div className="absolute top-4 right-4 z-10 flex flex-col gap-1.5 bg-card/80 backdrop-blur-md rounded-full p-1.5 shadow-md border border-border/50">
                   <button
                     onClick={() => setZoom(z => Math.min(z + 0.25, 3))}
@@ -353,28 +357,52 @@ const TryOnStudio = () => {
                     −
                   </button>
                   <button
-                    onClick={() => { setZoom(1); setRotation(0); }}
+                    onClick={() => setZoom(1)}
                     className="w-8 h-8 rounded-full grid place-items-center hover:bg-muted transition text-foreground text-xs"
-                    aria-label="Reset"
-                    title="Reset view"
+                    aria-label="Reset zoom"
+                    title="Reset zoom"
                   >
                     ⟲
                   </button>
+                  <button
+                    onClick={() => setFullscreen(true)}
+                    className="w-8 h-8 rounded-full grid place-items-center hover:bg-muted transition text-foreground text-sm"
+                    aria-label="Fullscreen"
+                    title="Fullscreen"
+                  >
+                    ⛶
+                  </button>
                 </div>
 
-                {/* 360° rotation slider — bottom */}
-                <div className="absolute bottom-4 left-4 right-4 z-10 bg-card/80 backdrop-blur-md rounded-full px-4 py-2 shadow-md border border-border/50 flex items-center gap-3">
-                  <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">360°</span>
-                  <input
-                    type="range"
-                    min={-180}
-                    max={180}
-                    value={rotation}
-                    onChange={(e) => setRotation(Number(e.target.value))}
-                    className="flex-1 accent-primary h-1 cursor-pointer"
-                    aria-label="Rotate view"
-                  />
-                  <span className="text-xs font-mono text-muted-foreground w-10 text-right">{rotation}°</span>
+                {/* Angle picker — bottom */}
+                <div className="absolute bottom-4 left-4 right-4 z-10 bg-card/80 backdrop-blur-md rounded-full px-2 py-1.5 shadow-md border border-border/50 flex items-center justify-center gap-1 flex-wrap">
+                  {([
+                    { id: 'front', label: 'Front' },
+                    { id: 'three-quarter', label: '3/4' },
+                    { id: 'side', label: 'Side' },
+                    { id: 'back', label: 'Back' },
+                  ] as const).map(opt => {
+                    const isActive = angle === opt.id;
+                    const hasView = !!angleViews[opt.id];
+                    return (
+                      <button
+                        key={opt.id}
+                        disabled={!!loadingAngle}
+                        onClick={() => {
+                          if (opt.id === 'front' || hasView) setAngle(opt.id);
+                          else handleGenerateAngle(opt.id);
+                        }}
+                        className={`text-xs px-3 py-1.5 rounded-full transition-all whitespace-nowrap disabled:opacity-50 ${
+                          isActive
+                            ? 'bg-primary text-primary-foreground font-medium'
+                            : 'text-foreground hover:bg-muted'
+                        }`}
+                        title={hasView ? `${opt.label} view` : `Generate ${opt.label} view`}
+                      >
+                        {opt.label}{!hasView && opt.id !== 'front' ? ' ✨' : ''}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ) : !userPhoto ? (
