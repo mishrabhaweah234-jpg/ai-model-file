@@ -14,6 +14,8 @@ const TryOnStudio = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraActive, setCameraActive] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
 
   const top = tryOn.top ? products.find(p => p.id === tryOn.top) : null;
   const bottom = tryOn.bottom ? products.find(p => p.id === tryOn.bottom) : null;
