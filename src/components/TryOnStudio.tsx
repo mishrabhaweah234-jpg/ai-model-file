@@ -278,14 +278,6 @@ const TryOnStudio = () => {
               <div className="relative w-full h-full flex flex-col items-center">
                 <div className="relative mt-8">
                   <img src={generatedImage} alt="AI Try-On Result" className="max-h-[340px] rounded-2xl object-cover shadow-lg" />
-                  {/* Overlay clothing labels */}
-                  <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-1.5">
-                    {selected.map(p => (
-                      <span key={p!.id} className="badge-tag text-[10px] !py-1 !px-2 backdrop-blur-sm bg-card/80">
-                        {p!.name}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
             ) : !userPhoto ? (
