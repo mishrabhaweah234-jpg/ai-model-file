@@ -278,8 +278,58 @@ const TryOnStudio = () => {
             ) : generatedImage ? (
               /* Generated Result */
               <div className="relative w-full h-full flex flex-col items-center">
-                <div className="relative mt-8">
-                  <img src={generatedImage} alt="AI Try-On Result" className="max-h-[340px] rounded-2xl object-cover shadow-lg" />
+                <div className="relative mt-8 overflow-hidden rounded-2xl max-h-[340px]">
+                  <img
+                    src={generatedImage}
+                    alt="AI Try-On Result"
+                    className="max-h-[340px] rounded-2xl object-cover shadow-lg transition-transform duration-300 ease-out will-change-transform"
+                    style={{
+                      transform: `scale(${zoom}) perspective(1000px) rotateY(${rotation}deg)`,
+                    }}
+                  />
+                </div>
+
+                {/* Zoom controls — top right corner */}
+                <div className="absolute top-4 right-4 z-10 flex flex-col gap-1.5 bg-card/80 backdrop-blur-md rounded-full p-1.5 shadow-md border border-border/50">
+                  <button
+                    onClick={() => setZoom(z => Math.min(z + 0.25, 3))}
+                    className="w-8 h-8 rounded-full grid place-items-center hover:bg-muted transition text-foreground font-bold text-lg leading-none"
+                    aria-label="Zoom in"
+                    title="Zoom in"
+                  >
+                    +
+                  </button>
+                  <button
+                    onClick={() => setZoom(z => Math.max(z - 0.25, 0.5))}
+                    className="w-8 h-8 rounded-full grid place-items-center hover:bg-muted transition text-foreground font-bold text-lg leading-none"
+                    aria-label="Zoom out"
+                    title="Zoom out"
+                  >
+                    −
+                  </button>
+                  <button
+                    onClick={() => { setZoom(1); setRotation(0); }}
+                    className="w-8 h-8 rounded-full grid place-items-center hover:bg-muted transition text-foreground text-xs"
+                    aria-label="Reset"
+                    title="Reset view"
+                  >
+                    ⟲
+                  </button>
+                </div>
+
+                {/* 360° rotation slider — bottom */}
+                <div className="absolute bottom-4 left-4 right-4 z-10 bg-card/80 backdrop-blur-md rounded-full px-4 py-2 shadow-md border border-border/50 flex items-center gap-3">
+                  <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">360°</span>
+                  <input
+                    type="range"
+                    min={-180}
+                    max={180}
+                    value={rotation}
+                    onChange={(e) => setRotation(Number(e.target.value))}
+                    className="flex-1 accent-primary h-1 cursor-pointer"
+                    aria-label="Rotate view"
+                  />
+                  <span className="text-xs font-mono text-muted-foreground w-10 text-right">{rotation}°</span>
                 </div>
               </div>
             ) : !userPhoto ? (
