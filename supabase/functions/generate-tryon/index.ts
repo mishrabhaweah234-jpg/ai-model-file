@@ -33,17 +33,19 @@ serve(async (req) => {
       )
       .join(". ");
 
-    const prompt = `You are a virtual fashion try-on assistant. Take this photo of a person and generate a realistic image of them wearing the following outfit: ${clothingDescription}. 
+    const prompt = `You are a virtual fashion try-on assistant. Take this photo of a person and generate a realistic image of them wearing the following outfit: ${clothingDescription}.
 
-CRITICAL INSTRUCTIONS:
-- Keep the person's face, body shape, and pose EXACTLY the same.
-- Do NOT rotate, flip, or change the orientation of the image in any way.
-- The output image MUST have the SAME orientation and aspect ratio as the input photo.
-- If the person is standing upright in the photo, they must remain standing upright in the output.
+CRITICAL OUTPUT REQUIREMENTS:
+- The output image MUST be in PORTRAIT orientation (vertical, taller than wide, e.g. 9:16 or 3:4 aspect ratio).
+- The person must be standing upright, fully visible, centered in a vertical frame.
+- Do NOT produce a landscape (horizontal) image under any circumstance.
+- If the input photo is landscape, re-frame it as a portrait composition while keeping the person upright.
+
+PERSON & OUTFIT:
+- Keep the person's face, body shape, skin tone, and pose EXACTLY the same.
 - Only change their clothing to match the described items.
-- The result should look like a natural, high-quality fashion photo.
-- Make it look realistic and well-fitted.
-- Maintain the original image's vertical/horizontal orientation exactly.`;
+- Make the outfit look realistic, well-fitted, and naturally lit.
+- The result should look like a high-quality vertical fashion editorial photo.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
