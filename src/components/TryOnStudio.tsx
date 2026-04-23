@@ -339,8 +339,12 @@ const TryOnStudio = () => {
                   )}
                 </div>
 
-                {/* Zoom + fullscreen controls — top right corner */}
-                <div className="absolute top-4 right-4 z-10 flex flex-col gap-1.5 bg-card/80 backdrop-blur-md rounded-full p-1.5 shadow-md border border-border/50">
+                {/* Zoom + fullscreen controls — top right corner (draggable) */}
+                <DraggablePanel
+                  initial={{ top: '1rem', right: '1rem' }}
+                  className="flex flex-col gap-1 bg-card/80 backdrop-blur-md rounded-2xl p-1.5 shadow-md border border-border/50"
+                  handleClassName="h-3 -mb-0.5"
+                >
                   <button
                     onClick={() => setZoom(z => Math.min(z + 0.25, 3))}
                     className="w-8 h-8 rounded-full grid place-items-center hover:bg-muted transition text-foreground font-bold text-lg leading-none"
@@ -373,10 +377,14 @@ const TryOnStudio = () => {
                   >
                     ⛶
                   </button>
-                </div>
+                </DraggablePanel>
 
-                {/* Angle picker — left side, vertical */}
-                <div className="absolute top-1/2 left-4 -translate-y-1/2 z-10 bg-card/80 backdrop-blur-md rounded-full px-1.5 py-2 shadow-md border border-border/50 flex flex-col items-stretch gap-1">
+                {/* Angle picker — left side, vertical (draggable) */}
+                <DraggablePanel
+                  initial={{ top: '50%', left: '1rem', transform: 'translateY(-50%)' }}
+                  className="bg-card/80 backdrop-blur-md rounded-2xl px-1.5 pb-2 shadow-md border border-border/50 flex flex-col items-stretch gap-1"
+                  handleClassName="h-3 -mb-0.5"
+                >
                   {([
                     { id: 'front', label: 'Front' },
                     { id: 'three-quarter', label: '3/4' },
@@ -404,7 +412,7 @@ const TryOnStudio = () => {
                       </button>
                     );
                   })}
-                </div>
+                </DraggablePanel>
               </div>
             ) : !userPhoto ? (
               /* Empty — No photo */
