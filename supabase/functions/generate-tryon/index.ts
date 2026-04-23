@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { userPhoto, selectedItems } = await req.json();
+    const { userPhoto, selectedItems, angle = "front", baseImage } = await req.json();
 
     if (!userPhoto || !selectedItems || selectedItems.length === 0) {
       return new Response(
@@ -33,7 +33,20 @@ serve(async (req) => {
       )
       .join(". ");
 
+    const angleInstructions: Record<string, string> = {
+      front: "Show the person from the FRONT view (facing the camera directly).",
+      back: "Show the person from the BACK view (facing AWAY from the camera, so the back of their head, back of the outfit, and back of shoes are visible). The person should not be looking at the camera.",
+      side: "Show the person from a SIDE PROFILE view (90° to the camera, showing their left or right side).",
+      "three-quarter": "Show the person from a 3/4 angle view (rotated about 45° from the camera).",
+    };
+    const angleText = angleInstructions[angle] || angleInstructions.front;
+
+    const sourceImage = baseImage || userPhoto;
+
     const prompt = `You are a virtual fashion try-on assistant. Take this photo of a person and generate a realistic image of them wearing the following outfit: ${clothingDescription}.
+
+CAMERA ANGLE:
+${angleText}
 
 CRITICAL OUTPUT REQUIREMENTS:
 - The output image MUST be in PORTRAIT orientation (vertical, taller than wide, e.g. 9:16 or 3:4 aspect ratio).
@@ -42,8 +55,8 @@ CRITICAL OUTPUT REQUIREMENTS:
 - If the input photo is landscape, re-frame it as a portrait composition while keeping the person upright.
 
 PERSON & OUTFIT:
-- Keep the person's face, body shape, skin tone, and pose EXACTLY the same.
-- Only change their clothing to match the described items.
+- Keep the person's face, body shape, skin tone, hair, and overall identity EXACTLY the same as the input photo.
+- Only change their clothing to match the described items, and rotate them to match the requested camera angle.
 - Make the outfit look realistic, well-fitted, and naturally lit.
 - The result should look like a high-quality vertical fashion editorial photo.`;
 
@@ -62,7 +75,7 @@ PERSON & OUTFIT:
               { type: "text", text: prompt },
               {
                 type: "image_url",
-                image_url: { url: userPhoto },
+                image_url: { url: sourceImage },
               },
             ],
           },

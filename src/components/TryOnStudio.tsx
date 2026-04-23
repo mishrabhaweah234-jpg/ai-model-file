@@ -15,7 +15,10 @@ const TryOnStudio = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [zoom, setZoom] = useState(1);
-  const [rotation, setRotation] = useState(0);
+  const [angle, setAngle] = useState<'front' | 'three-quarter' | 'side' | 'back'>('front');
+  const [angleViews, setAngleViews] = useState<Record<string, string>>({});
+  const [loadingAngle, setLoadingAngle] = useState<string | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
 
   const top = tryOn.top ? products.find(p => p.id === tryOn.top) : null;
   const bottom = tryOn.bottom ? products.find(p => p.id === tryOn.bottom) : null;
@@ -86,6 +89,9 @@ const TryOnStudio = () => {
     if (!userPhoto || selected.length === 0) return;
     setIsGenerating(true);
     setGeneratedImage(null);
+    setAngleViews({});
+    setAngle('front');
+    setZoom(1);
 
     try {
       const selectedItems = selected.map(p => ({
@@ -95,7 +101,7 @@ const TryOnStudio = () => {
       }));
 
       const { data, error } = await supabase.functions.invoke('generate-tryon', {
-        body: { userPhoto, selectedItems },
+        body: { userPhoto, selectedItems, angle: 'front' },
       });
 
       if (error) {
@@ -109,6 +115,7 @@ const TryOnStudio = () => {
 
       if (data?.image) {
         setGeneratedImage(data.image);
+        setAngleViews({ front: data.image });
         toast({ title: '✨ Try-On Ready!', description: 'Your AI-generated outfit preview is ready.' });
       } else {
         toast({ title: 'No image generated', description: 'AI could not produce an image. Try a clearer full-body photo.', variant: 'destructive' });
@@ -121,6 +128,44 @@ const TryOnStudio = () => {
     }
   };
 
+  const handleGenerateAngle = async (targetAngle: 'three-quarter' | 'side' | 'back') => {
+    if (!generatedImage || !userPhoto || selected.length === 0) return;
+    if (angleViews[targetAngle]) {
+      setAngle(targetAngle);
+      return;
+    }
+    setLoadingAngle(targetAngle);
+    try {
+      const selectedItems = selected.map(p => ({
+        name: p!.name,
+        category: p!.category,
+        description: p!.description,
+      }));
+      const { data, error } = await supabase.functions.invoke('generate-tryon', {
+        body: {
+          userPhoto,
+          selectedItems,
+          angle: targetAngle,
+          baseImage: angleViews.front || generatedImage,
+        },
+      });
+      if (error) throw new Error(error.message || 'Angle generation failed');
+      if (data?.error) {
+        toast({ title: 'Angle Error', description: data.error, variant: 'destructive' });
+        return;
+      }
+      if (data?.image) {
+        setAngleViews(prev => ({ ...prev, [targetAngle]: data.image }));
+        setAngle(targetAngle);
+      }
+    } catch (err: any) {
+      toast({ title: 'Angle Failed', description: err.message || 'Something went wrong.', variant: 'destructive' });
+    } finally {
+      setLoadingAngle(null);
+    }
+  };
+
+  const currentImage = angleViews[angle] || generatedImage;
   const canGenerate = !!userPhoto && selected.length > 0;
 
   return (
@@ -280,16 +325,20 @@ const TryOnStudio = () => {
               <div className="relative w-full h-full flex flex-col items-center">
                 <div className="relative mt-8 overflow-hidden rounded-2xl max-h-[340px]">
                   <img
-                    src={generatedImage}
-                    alt="AI Try-On Result"
+                    src={currentImage!}
+                    alt={`AI Try-On Result — ${angle} view`}
                     className="max-h-[340px] rounded-2xl object-cover shadow-lg transition-transform duration-300 ease-out will-change-transform"
-                    style={{
-                      transform: `scale(${zoom}) perspective(1000px) rotateY(${rotation}deg)`,
-                    }}
+                    style={{ transform: `scale(${zoom})` }}
                   />
+                  {loadingAngle && (
+                    <div className="absolute inset-0 bg-background/70 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center gap-2">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-peach to-coral flex items-center justify-center text-2xl animate-pulse">✨</div>
+                      <span className="text-xs font-medium">Generating {loadingAngle} view…</span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Zoom controls — top right corner */}
+                {/* Zoom + fullscreen controls — top right corner */}
                 <div className="absolute top-4 right-4 z-10 flex flex-col gap-1.5 bg-card/80 backdrop-blur-md rounded-full p-1.5 shadow-md border border-border/50">
                   <button
                     onClick={() => setZoom(z => Math.min(z + 0.25, 3))}
@@ -308,28 +357,52 @@ const TryOnStudio = () => {
                     −
                   </button>
                   <button
-                    onClick={() => { setZoom(1); setRotation(0); }}
+                    onClick={() => setZoom(1)}
                     className="w-8 h-8 rounded-full grid place-items-center hover:bg-muted transition text-foreground text-xs"
-                    aria-label="Reset"
-                    title="Reset view"
+                    aria-label="Reset zoom"
+                    title="Reset zoom"
                   >
                     ⟲
                   </button>
+                  <button
+                    onClick={() => setFullscreen(true)}
+                    className="w-8 h-8 rounded-full grid place-items-center hover:bg-muted transition text-foreground text-sm"
+                    aria-label="Fullscreen"
+                    title="Fullscreen"
+                  >
+                    ⛶
+                  </button>
                 </div>
 
-                {/* 360° rotation slider — bottom */}
-                <div className="absolute bottom-4 left-4 right-4 z-10 bg-card/80 backdrop-blur-md rounded-full px-4 py-2 shadow-md border border-border/50 flex items-center gap-3">
-                  <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">360°</span>
-                  <input
-                    type="range"
-                    min={-180}
-                    max={180}
-                    value={rotation}
-                    onChange={(e) => setRotation(Number(e.target.value))}
-                    className="flex-1 accent-primary h-1 cursor-pointer"
-                    aria-label="Rotate view"
-                  />
-                  <span className="text-xs font-mono text-muted-foreground w-10 text-right">{rotation}°</span>
+                {/* Angle picker — bottom */}
+                <div className="absolute bottom-4 left-4 right-4 z-10 bg-card/80 backdrop-blur-md rounded-full px-2 py-1.5 shadow-md border border-border/50 flex items-center justify-center gap-1 flex-wrap">
+                  {([
+                    { id: 'front', label: 'Front' },
+                    { id: 'three-quarter', label: '3/4' },
+                    { id: 'side', label: 'Side' },
+                    { id: 'back', label: 'Back' },
+                  ] as const).map(opt => {
+                    const isActive = angle === opt.id;
+                    const hasView = !!angleViews[opt.id];
+                    return (
+                      <button
+                        key={opt.id}
+                        disabled={!!loadingAngle}
+                        onClick={() => {
+                          if (opt.id === 'front' || hasView) setAngle(opt.id);
+                          else handleGenerateAngle(opt.id);
+                        }}
+                        className={`text-xs px-3 py-1.5 rounded-full transition-all whitespace-nowrap disabled:opacity-50 ${
+                          isActive
+                            ? 'bg-primary text-primary-foreground font-medium'
+                            : 'text-foreground hover:bg-muted'
+                        }`}
+                        title={hasView ? `${opt.label} view` : `Generate ${opt.label} view`}
+                      >
+                        {opt.label}{!hasView && opt.id !== 'front' ? ' ✨' : ''}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ) : !userPhoto ? (
@@ -401,6 +474,28 @@ const TryOnStudio = () => {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen lightbox */}
+      {fullscreen && currentImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-6"
+          onClick={() => setFullscreen(false)}
+        >
+          <button
+            onClick={(e) => { e.stopPropagation(); setFullscreen(false); }}
+            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-card/80 backdrop-blur-md border border-border/50 grid place-items-center hover:bg-muted transition text-foreground text-lg"
+            aria-label="Close fullscreen"
+          >
+            ✕
+          </button>
+          <img
+            src={currentImage}
+            alt={`AI Try-On Result — ${angle} view (fullscreen)`}
+            className="max-h-[92vh] max-w-[92vw] object-contain rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </section>
   );
 };
