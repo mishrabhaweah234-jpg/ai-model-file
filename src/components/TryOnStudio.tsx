@@ -287,9 +287,6 @@ const TryOnStudio = () => {
                     ))}
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-3 text-center italic">
-                  🔮 AI-generated preview — connect backend for real results
-                </p>
               </div>
             ) : !userPhoto ? (
               /* Empty — No photo */
