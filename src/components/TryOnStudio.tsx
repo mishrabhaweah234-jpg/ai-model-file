@@ -474,6 +474,28 @@ const TryOnStudio = () => {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen lightbox */}
+      {fullscreen && currentImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-6"
+          onClick={() => setFullscreen(false)}
+        >
+          <button
+            onClick={(e) => { e.stopPropagation(); setFullscreen(false); }}
+            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-card/80 backdrop-blur-md border border-border/50 grid place-items-center hover:bg-muted transition text-foreground text-lg"
+            aria-label="Close fullscreen"
+          >
+            ✕
+          </button>
+          <img
+            src={currentImage}
+            alt={`AI Try-On Result — ${angle} view (fullscreen)`}
+            className="max-h-[92vh] max-w-[92vw] object-contain rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </section>
   );
 };
