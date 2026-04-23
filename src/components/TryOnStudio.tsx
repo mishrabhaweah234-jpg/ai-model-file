@@ -3,6 +3,7 @@ import { useStore } from '@/store/useStore';
 import { products, skinTones, backdrops } from '@/data/products';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import DraggablePanel from './DraggablePanel';
 
 const TryOnStudio = () => {
   const {
