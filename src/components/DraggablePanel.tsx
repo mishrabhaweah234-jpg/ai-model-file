@@ -1,34 +1,49 @@
-import { useRef, useState, useCallback, useEffect, ReactNode } from 'react';
+import { useRef, useState, useCallback, useEffect, ReactNode, forwardRef, useImperativeHandle } from 'react';
 
 interface DraggablePanelProps {
   children: ReactNode;
   /** Initial position in CSS, e.g. { top: '50%', left: '1rem', transform: 'translateY(-50%)' } */
   initial: React.CSSProperties;
   className?: string;
-  /** Optional extra classes for the drag handle bar */
   handleClassName?: string;
-  /** Container ref to constrain dragging within (defaults to offsetParent) */
   boundsRef?: React.RefObject<HTMLElement>;
+  /** Snap panel to nearest horizontal edge after drop. */
+  snapToEdge?: boolean;
+  /** Padding from container edge when snapping. */
+  snapPadding?: number;
+}
+
+export interface DraggablePanelHandle {
+  reset: () => void;
 }
 
 /**
- * Wraps content in an absolutely-positioned panel with a small drag handle (⋮⋮)
- * that lets the user reposition it within its containing element.
+ * Absolutely-positioned panel with a drag handle (⋮⋮) that lets the user
+ * reposition it within its containing element. Optional snap-to-edge.
  */
-const DraggablePanel = ({
+const DraggablePanel = forwardRef<DraggablePanelHandle, DraggablePanelProps>(({
   children,
   initial,
   className = '',
   handleClassName = '',
   boundsRef,
-}: DraggablePanelProps) => {
+  snapToEdge = false,
+  snapPadding = 12,
+}, ref) => {
   const panelRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
-  const dragState = useRef<{ startX: number; startY: number; origLeft: number; origTop: number } | null>(null);
+  const dragState = useRef<{ startX: number; startY: number; origLeft: number; origTop: number; moved: boolean } | null>(null);
+
+  useImperativeHandle(ref, () => ({ reset: () => setPos(null) }), []);
+
+  const getParent = useCallback((): HTMLElement | null => {
+    if (boundsRef?.current) return boundsRef.current;
+    return (panelRef.current?.offsetParent as HTMLElement | null) ?? null;
+  }, [boundsRef]);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     if (!panelRef.current) return;
-    const parent = boundsRef?.current || (panelRef.current.offsetParent as HTMLElement | null);
+    const parent = getParent();
     if (!parent) return;
 
     const panelRect = panelRef.current.getBoundingClientRect();
@@ -39,18 +54,21 @@ const DraggablePanel = ({
       startY: e.clientY,
       origLeft: panelRect.left - parentRect.left,
       origTop: panelRect.top - parentRect.top,
+      moved: false,
     };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
     e.preventDefault();
-  }, [boundsRef]);
+  }, [getParent]);
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragState.current || !panelRef.current) return;
-    const parent = boundsRef?.current || (panelRef.current.offsetParent as HTMLElement | null);
+    const parent = getParent();
     if (!parent) return;
 
     const dx = e.clientX - dragState.current.startX;
     const dy = e.clientY - dragState.current.startY;
+    if (Math.abs(dx) + Math.abs(dy) > 2) dragState.current.moved = true;
+
     const panelRect = panelRef.current.getBoundingClientRect();
     const parentRect = parent.getBoundingClientRect();
 
@@ -61,14 +79,31 @@ const DraggablePanel = ({
     const nextTop = Math.min(Math.max(dragState.current.origTop + dy, 0), Math.max(0, maxTop));
 
     setPos({ left: nextLeft, top: nextTop });
-  }, [boundsRef]);
+  }, [getParent]);
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
+    const parent = getParent();
+    if (snapToEdge && dragState.current?.moved && panelRef.current && parent) {
+      const panelRect = panelRef.current.getBoundingClientRect();
+      const parentRect = parent.getBoundingClientRect();
+      setPos(prev => {
+        if (!prev) return prev;
+        const center = prev.left + panelRect.width / 2;
+        const snappedLeft = center < parentRect.width / 2
+          ? snapPadding
+          : Math.max(snapPadding, parentRect.width - panelRect.width - snapPadding);
+        const clampedTop = Math.min(
+          Math.max(prev.top, snapPadding),
+          Math.max(snapPadding, parentRect.height - panelRect.height - snapPadding)
+        );
+        return { left: snappedLeft, top: clampedTop };
+      });
+    }
     dragState.current = null;
     try { (e.target as HTMLElement).releasePointerCapture(e.pointerId); } catch { /* ignore */ }
-  }, []);
+  }, [getParent, snapToEdge, snapPadding]);
 
-  // Reset to initial when window resizes significantly so it doesn't escape bounds
+  // Reset on window resize so panels don't escape bounds
   useEffect(() => {
     const handler = () => setPos(null);
     window.addEventListener('resize', handler);
@@ -76,7 +111,12 @@ const DraggablePanel = ({
   }, []);
 
   const style: React.CSSProperties = pos
-    ? { position: 'absolute', left: pos.left, top: pos.top }
+    ? {
+        position: 'absolute',
+        left: pos.left,
+        top: pos.top,
+        transition: snapToEdge && !dragState.current ? 'left 0.2s ease, top 0.2s ease' : undefined,
+      }
     : { position: 'absolute', ...initial };
 
   return (
@@ -95,6 +135,8 @@ const DraggablePanel = ({
       {children}
     </div>
   );
-};
+});
+
+DraggablePanel.displayName = 'DraggablePanel';
 
 export default DraggablePanel;
