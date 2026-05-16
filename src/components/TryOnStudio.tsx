@@ -1,38 +1,47 @@
 import { useRef, useCallback, useState, useMemo } from 'react';
 import { useStore } from '@/store/useStore';
 import { products, skinTones, backdrops } from '@/data/products';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import OverlayComposer, { type OverlayComposerHandle } from './tryon/OverlayComposer';
+import { useIsMobile } from '@/hooks/use-mobile';
+import DraggablePanel, { type DraggablePanelHandle } from './DraggablePanel';
+import AngleSelector from './tryon/AngleSelector';
+import FloatingControls from './tryon/FloatingControls';
+import ResultCanvas from './tryon/ResultCanvas';
 import { downloadImage, shareImage } from './tryon/imageActions';
+import { useTryOnCache, buildSignature } from '@/hooks/useTryOnCache';
+import type { Angle } from './tryon/types';
 
 const MIN_ZOOM = 0.5;
-const MAX_ZOOM = 2;
+const MAX_ZOOM = 3;
 
 const TryOnStudio = () => {
   const {
     tryOn, setTryOn, selectedTone, setTone, selectedBackdrop, setBackdrop,
-    userPhoto, setUserPhoto,
+    userPhoto, setUserPhoto, isGenerating, setIsGenerating, generatedImage, setGeneratedImage,
     addToBag,
   } = useStore();
 
+  const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
-  const composerRef = useRef<OverlayComposerHandle>(null);
+  const zoomPanelRef = useRef<DraggablePanelHandle>(null);
+  const anglePanelRef = useRef<DraggablePanelHandle>(null);
 
   const [cameraActive, setCameraActive] = useState(false);
   const [dragOver, setDragOver] = useState(false);
-  const [zoom, setZoom] = useState(1);
+  const [zoom, setZoomState] = useState(1);
+  const [angle, setAngle] = useState<Angle>('front');
+  const [loadingAngle, setLoadingAngle] = useState<Angle | null>(null);
   const [fullscreen, setFullscreen] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
 
   const top = tryOn.top ? products.find(p => p.id === tryOn.top) : null;
   const bottom = tryOn.bottom ? products.find(p => p.id === tryOn.bottom) : null;
   const shoes = tryOn.shoes ? products.find(p => p.id === tryOn.shoes) : null;
   const bag = tryOn.bag ? products.find(p => p.id === tryOn.bag) : null;
-  const selected = useMemo(
-    () => [top, bottom, shoes, bag].filter(Boolean) as NonNullable<typeof top>[],
-    [top, bottom, shoes, bag]
-  );
+  const selected = useMemo(() => [top, bottom, shoes, bag].filter(Boolean), [top, bottom, shoes, bag]);
 
   const backdrop = backdrops.find(b => b.id === selectedBackdrop) || backdrops[0];
 
@@ -41,7 +50,16 @@ const TryOnStudio = () => {
     active: tryOn[p.category.toLowerCase() as keyof typeof tryOn] === p.id,
   }));
 
-  const clampZoom = (z: number) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
+  // Persistent cache keyed by photo + outfit
+  const signature = useMemo(
+    () => buildSignature(userPhoto, selected.map(p => p!.id)),
+    [userPhoto, selected]
+  );
+  const { views: angleViews, setAngleImage, clear: clearCache, setViews } = useTryOnCache(signature);
+
+  const setZoom = useCallback((updater: (z: number) => number) => {
+    setZoomState((z) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, updater(z))));
+  }, []);
 
   const handleFileSelect = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) return;
@@ -94,35 +112,119 @@ const TryOnStudio = () => {
     setCameraActive(false);
   };
 
-  const canCompose = !!userPhoto && selected.length > 0;
-  const outfitName = selected.length ? selected.map(i => i.name).join(' + ') : 'try-on';
+  const handleGenerateTryOn = async (force = false) => {
+    if (!userPhoto || selected.length === 0) return;
 
-  const handleDownload = async () => {
-    const dataUrl = await composerRef.current?.exportPNG();
-    if (dataUrl) downloadImage(dataUrl, outfitName);
-    else toast({ title: 'Download failed', description: 'Could not export the composite.', variant: 'destructive' });
+    // Use cached front view if available unless forcing regeneration
+    if (!force && angleViews.front) {
+      setGeneratedImage(angleViews.front);
+      setAngle('front');
+      toast({ title: 'Loaded from cache', description: 'Tap "Regenerate" to make a new one.' });
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratedImage(null);
+    setViews({});
+    setAngle('front');
+    setZoomState(1);
+    setCompareMode(false);
+
+    try {
+      const selectedItems = selected.map(p => ({
+        name: p!.name,
+        category: p!.category,
+        description: p!.description,
+      }));
+
+      const { data, error } = await supabase.functions.invoke('generate-tryon', {
+        body: { userPhoto, selectedItems, angle: 'front' },
+      });
+
+      if (error) throw new Error(error.message || 'Generation failed');
+      if (data?.error) {
+        toast({ title: 'Try-On Error', description: data.error, variant: 'destructive' });
+        return;
+      }
+      if (data?.image) {
+        setGeneratedImage(data.image);
+        setAngleImage('front', data.image);
+        toast({ title: '✨ Try-On Ready!', description: 'Your AI-generated outfit preview is ready.' });
+      } else {
+        toast({ title: 'No image generated', description: 'AI could not produce an image. Try a clearer full-body photo.', variant: 'destructive' });
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      console.error('Try-on generation error:', err);
+      toast({ title: 'Generation Failed', description: msg, variant: 'destructive' });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const handleShare = async () => {
-    const dataUrl = await composerRef.current?.exportPNG();
-    if (dataUrl) shareImage(dataUrl, outfitName);
+  const handleGenerateAngle = async (targetAngle: Exclude<Angle, 'front'>, force = false) => {
+    if (!generatedImage || !userPhoto || selected.length === 0) return;
+    if (!force && angleViews[targetAngle]) {
+      setAngle(targetAngle);
+      return;
+    }
+    setLoadingAngle(targetAngle);
+    try {
+      const selectedItems = selected.map(p => ({
+        name: p!.name,
+        category: p!.category,
+        description: p!.description,
+      }));
+      const { data, error } = await supabase.functions.invoke('generate-tryon', {
+        body: {
+          userPhoto,
+          selectedItems,
+          angle: targetAngle,
+          baseImage: angleViews.front || generatedImage,
+        },
+      });
+      if (error) throw new Error(error.message || 'Angle generation failed');
+      if (data?.error) {
+        toast({ title: 'Angle Error', description: data.error, variant: 'destructive' });
+        return;
+      }
+      if (data?.image) {
+        setAngleImage(targetAngle, data.image);
+        setAngle(targetAngle);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong.';
+      toast({ title: 'Angle Failed', description: msg, variant: 'destructive' });
+    } finally {
+      setLoadingAngle(null);
+    }
   };
+
+  const currentImage = angleViews[angle] || generatedImage;
+  const canGenerate = !!userPhoto && selected.length > 0;
+
+  const outfitName = selected.length ? selected.map(i => i!.name).join(' + ') : 'try-on';
 
   const handleBuyLook = () => {
     if (selected.length === 0) return;
-    selected.forEach(p => addToBag(p.id));
+    selected.forEach(p => addToBag(p!.id));
     toast({ title: '🛍️ Added to bag', description: `${selected.length} item${selected.length > 1 ? 's' : ''} from this look added.` });
+  };
+
+  const resetPanels = () => {
+    zoomPanelRef.current?.reset();
+    anglePanelRef.current?.reset();
   };
 
   return (
     <section id="studio" className="glass-surface !rounded-3xl p-6 mt-4">
       <div className="flex justify-between items-start mb-5 flex-wrap gap-2">
         <div>
-          <p className="eyebrow">Image-based</p>
+          <p className="eyebrow">AI-Powered</p>
           <h3 className="font-display text-2xl">Virtual Try-On Studio</h3>
         </div>
-        <span className="text-xs text-muted-foreground max-w-[320px] text-right">
-          Upload your photo, pick items, and drag each piece into place to compose your look.
+        <span className="text-xs text-muted-foreground max-w-[300px] text-right">
+          Upload your photo, select clothes, and AI will generate you wearing the outfit.
         </span>
       </div>
 
@@ -212,44 +314,37 @@ const TryOnStudio = () => {
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-3">
-              Tip: click any item on your photo to resize, rotate, or reset it.
-            </p>
           </div>
         </div>
 
-        {/* Right Panel — Composer */}
+        {/* Right Panel — AI Preview */}
         <div className="glass-surface !rounded-3xl p-5">
           <div className="flex justify-between items-start mb-4 flex-wrap gap-2">
             <div>
-              <span className="eyebrow">Step 3 — Compose your look</span>
+              <span className="eyebrow">Step 3 — AI Preview</span>
               <h4 className="font-display text-lg mt-1">
                 {selected.length ? outfitName : 'Select clothes to preview'}
               </h4>
             </div>
-            {canCompose && (
-              <div className="flex gap-1.5 items-center bg-card/70 backdrop-blur rounded-full p-1 border border-border/50">
+            {canGenerate && (
+              <div className="flex gap-2">
+                {generatedImage && (
+                  <button
+                    onClick={() => handleGenerateTryOn(true)}
+                    disabled={isGenerating}
+                    className="btn-secondary text-xs !py-2.5 !px-3 disabled:opacity-50"
+                    title="Generate a new try-on from scratch"
+                  >
+                    🔄 Regenerate
+                  </button>
+                )}
                 <button
-                  onClick={() => setZoom(z => clampZoom(z - 0.1))}
-                  className="w-7 h-7 rounded-full hover:bg-muted grid place-items-center text-sm"
-                  title="Zoom out"
-                >−</button>
-                <span className="text-xs w-10 text-center">{Math.round(zoom * 100)}%</span>
-                <button
-                  onClick={() => setZoom(z => clampZoom(z + 0.1))}
-                  className="w-7 h-7 rounded-full hover:bg-muted grid place-items-center text-sm"
-                  title="Zoom in"
-                >+</button>
-                <button
-                  onClick={() => setZoom(1)}
-                  className="px-2 h-7 rounded-full hover:bg-muted text-[10px] uppercase tracking-wider"
-                  title="Reset zoom"
-                >reset</button>
-                <button
-                  onClick={() => setFullscreen(true)}
-                  className="w-7 h-7 rounded-full hover:bg-muted grid place-items-center text-sm"
-                  title="Fullscreen"
-                >⛶</button>
+                  onClick={() => handleGenerateTryOn(false)}
+                  disabled={isGenerating}
+                  className="btn-primary text-sm !py-2.5 !px-5 disabled:opacity-50"
+                >
+                  {isGenerating ? '✨ Generating...' : generatedImage ? '✨ Try-On' : '🪄 Generate Try-On'}
+                </button>
               </div>
             )}
           </div>
@@ -257,16 +352,99 @@ const TryOnStudio = () => {
           {/* Preview Area */}
           <div
             ref={previewRef}
-            className="rounded-3xl min-h-[460px] p-6 relative flex flex-col items-center justify-center overflow-hidden"
+            className="rounded-3xl min-h-[400px] p-6 relative flex flex-col items-center justify-center overflow-hidden"
             style={{ background: backdrop.style }}
           >
-            {canCompose ? (
-              <OverlayComposer
-                ref={composerRef}
-                userPhoto={userPhoto!}
-                items={selected}
-                zoom={zoom}
-              />
+            {/* View tabs */}
+            <div className="flex gap-2 absolute top-4 left-4 z-10">
+              {['Front View', 'Fit Overlay', 'Color Match'].map((v, i) => (
+                <button key={v} className={`badge-tag text-xs !py-1.5 !px-3 ${i === 0 ? '!bg-navy !text-primary-foreground' : ''}`}>
+                  {v}
+                </button>
+              ))}
+            </div>
+
+            {isGenerating ? (
+              <div className="flex flex-col items-center gap-4 animate-pulse">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-peach to-coral flex items-center justify-center text-4xl">
+                  ✨
+                </div>
+                <div className="text-center">
+                  <strong className="font-display text-lg block">AI is working its magic...</strong>
+                  <p className="text-sm text-muted-foreground mt-1">Generating your virtual try-on image</p>
+                </div>
+                <div className="flex gap-1 mt-2">
+                  {[0, 1, 2].map(i => (
+                    <div
+                      key={i}
+                      className="w-3 h-3 rounded-full bg-primary"
+                      style={{ animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : generatedImage && currentImage && userPhoto ? (
+              <div className="relative w-full h-full flex flex-col items-center">
+                <ResultCanvas
+                  image={currentImage}
+                  originalPhoto={userPhoto}
+                  angle={angle}
+                  zoom={zoom}
+                  setZoom={setZoom}
+                  loadingAngle={loadingAngle}
+                  compareMode={compareMode}
+                />
+
+                {/* Desktop: floating draggable panels */}
+                {!isMobile && (
+                  <>
+                    <DraggablePanel
+                      ref={zoomPanelRef}
+                      initial={{ top: '1rem', right: '1rem' }}
+                      className="bg-card/80 backdrop-blur-md rounded-2xl p-1.5 shadow-md border border-border/50"
+                      handleClassName="h-3 -mb-0.5"
+                      boundsRef={previewRef}
+                      snapToEdge
+                    >
+                      <FloatingControls
+                        onZoomIn={() => setZoom(z => z + 0.25)}
+                        onZoomOut={() => setZoom(z => z - 0.25)}
+                        onResetZoom={() => setZoomState(1)}
+                        onFullscreen={() => setFullscreen(true)}
+                        onToggleCompare={() => setCompareMode(c => !c)}
+                        compareActive={compareMode}
+                        orientation="vertical"
+                      />
+                    </DraggablePanel>
+
+                    <DraggablePanel
+                      ref={anglePanelRef}
+                      initial={{ top: '50%', left: '1rem', transform: 'translateY(-50%)' }}
+                      className="bg-card/80 backdrop-blur-md rounded-2xl px-1.5 pb-2 shadow-md border border-border/50"
+                      handleClassName="h-3 -mb-0.5"
+                      boundsRef={previewRef}
+                      snapToEdge
+                    >
+                      <AngleSelector
+                        current={angle}
+                        views={angleViews}
+                        loadingAngle={loadingAngle}
+                        onSelect={setAngle}
+                        onGenerate={handleGenerateAngle}
+                        orientation="vertical"
+                      />
+                    </DraggablePanel>
+
+                    <button
+                      onClick={resetPanels}
+                      className="absolute bottom-3 left-3 z-10 text-[10px] uppercase tracking-widest bg-card/70 backdrop-blur px-2.5 py-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-card transition border border-border/50"
+                      title="Reset panel positions"
+                    >
+                      ↺ Reset layout
+                    </button>
+                  </>
+                )}
+              </div>
             ) : !userPhoto ? (
               <div className="flex flex-col items-center gap-3 text-center">
                 <div className="w-20 h-20 rounded-full bg-muted/50 grid place-items-center text-4xl">👤</div>
@@ -275,23 +453,83 @@ const TryOnStudio = () => {
                   Take a full-body photo or upload one, then select the clothes you want to try on.
                 </p>
               </div>
-            ) : (
+            ) : selected.length === 0 ? (
               <div className="flex flex-col items-center gap-3 text-center">
                 <img src={userPhoto} alt="Your photo" className="w-32 h-40 rounded-2xl object-cover opacity-60" />
                 <strong className="font-display text-lg">Now pick your outfit</strong>
                 <p className="text-sm text-muted-foreground max-w-[280px]">
-                  Select clothes from the panel on the left to start composing your look.
+                  Select clothes from the panel on the left, then hit "Generate Try-On" to see the magic.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-3 text-center">
+                <div className="relative">
+                  <img src={userPhoto} alt="Your photo" className="w-36 h-44 rounded-2xl object-cover" />
+                  <div className="absolute -right-4 -bottom-2 flex -space-x-2">
+                    {selected.slice(0, 3).map(p => (
+                      <div key={p!.id} className="w-10 h-10 rounded-xl border-2 border-card" style={{ background: p!.background }} />
+                    ))}
+                  </div>
+                </div>
+                <strong className="font-display text-lg mt-2">Ready to generate!</strong>
+                <p className="text-sm text-muted-foreground max-w-[280px]">
+                  {selected.length} item{selected.length > 1 ? 's' : ''} selected. Click "Generate Try-On" above to see yourself in this outfit.
                 </p>
               </div>
             )}
           </div>
 
-          {/* Action bar */}
-          {canCompose && (
+          {/* Mobile bottom sheet — angle picker + zoom + actions */}
+          {isMobile && generatedImage && currentImage && (
+            <div className="mt-3 glass-surface !rounded-2xl p-3 space-y-3">
+              <AngleSelector
+                current={angle}
+                views={angleViews}
+                loadingAngle={loadingAngle}
+                onSelect={setAngle}
+                onGenerate={handleGenerateAngle}
+                orientation="horizontal"
+              />
+              <div className="flex items-center justify-between gap-2">
+                <FloatingControls
+                  onZoomIn={() => setZoom(z => z + 0.25)}
+                  onZoomOut={() => setZoom(z => z - 0.25)}
+                  onResetZoom={() => setZoomState(1)}
+                  onFullscreen={() => setFullscreen(true)}
+                  onToggleCompare={() => setCompareMode(c => !c)}
+                  compareActive={compareMode}
+                  orientation="horizontal"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Action bar — download, share, buy the look */}
+          {generatedImage && currentImage && (
             <div className="flex flex-wrap gap-2 mt-3">
-              <button onClick={handleDownload} className="btn-secondary text-xs !py-2 !px-4">⬇ Download</button>
-              <button onClick={handleShare} className="btn-secondary text-xs !py-2 !px-4">🔗 Share</button>
-              <button onClick={handleBuyLook} className="btn-primary text-xs !py-2 !px-4 ml-auto">
+              <button
+                onClick={() => downloadImage(currentImage, outfitName)}
+                className="btn-secondary text-xs !py-2 !px-4"
+              >
+                ⬇ Download
+              </button>
+              <button
+                onClick={() => shareImage(currentImage, outfitName)}
+                className="btn-secondary text-xs !py-2 !px-4"
+              >
+                🔗 Share
+              </button>
+              <button
+                onClick={clearCache}
+                className="btn-secondary text-xs !py-2 !px-4"
+                title="Clear cached angles for this outfit"
+              >
+                🧹 Clear cache
+              </button>
+              <button
+                onClick={handleBuyLook}
+                className="btn-primary text-xs !py-2 !px-4 ml-auto"
+              >
                 🛍️ Buy this look ({selected.length})
               </button>
             </div>
@@ -331,7 +569,7 @@ const TryOnStudio = () => {
       </div>
 
       {/* Fullscreen lightbox */}
-      {fullscreen && canCompose && (
+      {fullscreen && currentImage && (
         <div
           className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-6"
           onClick={() => setFullscreen(false)}
@@ -343,12 +581,25 @@ const TryOnStudio = () => {
           >
             ✕
           </button>
-          <div onClick={(e) => e.stopPropagation()} className="max-h-[92vh] max-w-[92vw]">
-            <OverlayComposer
-              userPhoto={userPhoto!}
-              items={selected}
-              zoom={1}
-            />
+          <img
+            src={currentImage}
+            alt={`AI Try-On Result — ${angle} view (fullscreen)`}
+            className="max-h-[92vh] max-w-[92vw] object-contain rounded-2xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+            <button
+              onClick={(e) => { e.stopPropagation(); downloadImage(currentImage, outfitName); }}
+              className="btn-secondary text-xs !py-2 !px-4"
+            >
+              ⬇ Download
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); shareImage(currentImage, outfitName); }}
+              className="btn-secondary text-xs !py-2 !px-4"
+            >
+              🔗 Share
+            </button>
           </div>
         </div>
       )}
