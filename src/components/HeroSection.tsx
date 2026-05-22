@@ -1,12 +1,25 @@
 import { useStore } from '@/store/useStore';
 import { heroSlides } from '@/data/products';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import bannerImg from '@/assets/fashion-banner.jpg';
 import bannerImg2 from '@/assets/fashion-banner-2.jpg';
 import bannerImg3 from '@/assets/fashion-banner-3.jpg';
 import bannerImg4 from '@/assets/fashion-banner-4.jpg';
+import bannerImg5 from '@/assets/fashion-banner-5.jpg';
+import bannerImg6 from '@/assets/fashion-banner-6.jpg';
+import bannerImg7 from '@/assets/fashion-banner-7.jpg';
+import bannerImg8 from '@/assets/fashion-banner-8.jpg';
 
-const bannerImages = [bannerImg, bannerImg2, bannerImg3, bannerImg4];
+const shuffle = <T,>(arr: T[]) => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+const rawBannerImages = [bannerImg, bannerImg2, bannerImg3, bannerImg4, bannerImg5, bannerImg6, bannerImg7, bannerImg8];
 
 const HeroSection = () => {
   const { surpriseMe } = useStore();
@@ -15,6 +28,8 @@ const HeroSection = () => {
   const [bannerIndex, setBannerIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
+
+  const bannerImages = useMemo(() => shuffle(rawBannerImages), []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,7 +47,7 @@ const HeroSection = () => {
       setBannerIndex((i) => (i + 1) % bannerImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [bannerImages.length]);
 
   const primary = heroSlides[heroIndex];
   const secondary = heroSlides[(heroIndex + 1) % heroSlides.length];
