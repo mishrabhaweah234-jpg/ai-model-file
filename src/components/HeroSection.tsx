@@ -87,14 +87,56 @@ const HeroSection = () => {
             <button onClick={handleTryNow} className="btn-secondary text-sm">Surprise me ✨</button>
           </div>
         </div>
-        <div className="relative overflow-hidden min-h-[320px] md:min-h-full">
+        <div
+          className="relative overflow-hidden min-h-[320px] md:min-h-full group/carousel select-none"
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
           <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-card/40 z-10 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-card/30 to-transparent z-10 pointer-events-none" />
-          <img 
-            src={bannerImg} 
-            alt="Fashion Banner" 
-            className="w-full h-full object-cover transition-transform duration-[1.2s] ease-out hover:scale-[1.04]" 
-          />
+          <div
+            className="flex h-full w-full transition-transform duration-700 ease-out"
+            style={{ transform: `translateX(-${bannerIndex * 100}%)` }}
+          >
+            {bannerImages.map((src, i) => (
+              <img
+                key={i}
+                src={src}
+                alt={`Fashion Banner ${i + 1}`}
+                draggable={false}
+                className="w-full h-full object-cover flex-shrink-0"
+                style={{ width: '100%' }}
+                loading={i === 0 ? undefined : 'lazy'}
+              />
+            ))}
+          </div>
+
+          <button
+            onClick={() => goTo(bannerIndex - 1)}
+            aria-label="Previous image"
+            className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-card/70 backdrop-blur border border-border/60 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-card"
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => goTo(bannerIndex + 1)}
+            aria-label="Next image"
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-card/70 backdrop-blur border border-border/60 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity hover:bg-card"
+          >
+            ›
+          </button>
+
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+            {bannerImages.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                aria-label={`Go to image ${i + 1}`}
+                className={`h-1.5 rounded-full transition-all ${i === bannerIndex ? 'w-6 bg-foreground' : 'w-1.5 bg-foreground/40 hover:bg-foreground/70'}`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
