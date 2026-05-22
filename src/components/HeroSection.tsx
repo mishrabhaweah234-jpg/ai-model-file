@@ -47,6 +47,8 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const bannerImages = useMemo(() => shuffle(rawBannerImages), []);
+
   const primary = heroSlides[heroIndex];
   const secondary = heroSlides[(heroIndex + 1) % heroSlides.length];
 
