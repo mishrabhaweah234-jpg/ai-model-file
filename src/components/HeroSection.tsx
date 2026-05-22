@@ -27,7 +27,9 @@ const HeroSection = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
-  const touchDeltaX = useRef(0);
+  const touchDeltaX = useRef(1.5);
+
+  const bannerImages = useMemo(() => shuffle(rawBannerImages), []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -45,9 +47,7 @@ const HeroSection = () => {
       setBannerIndex((i) => (i + 1) % bannerImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
-
-  const bannerImages = useMemo(() => shuffle(rawBannerImages), []);
+  }, [bannerImages.length]);
 
   const primary = heroSlides[heroIndex];
   const secondary = heroSlides[(heroIndex + 1) % heroSlides.length];
