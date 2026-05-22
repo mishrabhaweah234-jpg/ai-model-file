@@ -27,7 +27,7 @@ const HeroSection = () => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
-  const touchDeltaX = useRef(1.5);
+  const touchDeltaX = useRef(0);
 
   const bannerImages = useMemo(() => shuffle(rawBannerImages), []);
 
