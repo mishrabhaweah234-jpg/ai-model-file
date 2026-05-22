@@ -1,12 +1,20 @@
 import { useStore } from '@/store/useStore';
 import { heroSlides } from '@/data/products';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import bannerImg from '@/assets/fashion-banner.jpg';
+import bannerImg2 from '@/assets/fashion-banner-2.jpg';
+import bannerImg3 from '@/assets/fashion-banner-3.jpg';
+import bannerImg4 from '@/assets/fashion-banner-4.jpg';
+
+const bannerImages = [bannerImg, bannerImg2, bannerImg3, bannerImg4];
 
 const HeroSection = () => {
   const { surpriseMe } = useStore();
   const [heroIndex, setHeroIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [bannerIndex, setBannerIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+  const touchDeltaX = useRef(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -19,12 +27,38 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBannerIndex((i) => (i + 1) % bannerImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   const primary = heroSlides[heroIndex];
   const secondary = heroSlides[(heroIndex + 1) % heroSlides.length];
+
+  const goTo = (i: number) => setBannerIndex((i + bannerImages.length) % bannerImages.length);
 
   const handleTryNow = () => {
     surpriseMe();
     document.getElementById('studio')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (touchStartX.current !== null) {
+      touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
+    }
+  };
+  const onTouchEnd = () => {
+    if (Math.abs(touchDeltaX.current) > 50) {
+      goTo(bannerIndex + (touchDeltaX.current < 0 ? 1 : -1));
+    }
+    touchStartX.current = null;
+    touchDeltaX.current = 0;
   };
 
   return (
