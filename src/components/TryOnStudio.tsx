@@ -539,6 +539,7 @@ const TryOnStudio = () => {
                 className="btn-secondary text-xs !py-2 !px-4"
               >
                 💖 Save look
+              </button>
               <button
                 onClick={clearCache}
                 className="btn-secondary text-xs !py-2 !px-4"
