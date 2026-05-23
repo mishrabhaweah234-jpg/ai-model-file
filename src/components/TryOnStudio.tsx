@@ -60,6 +60,21 @@ const TryOnStudio = () => {
     [userPhoto, selected]
   );
   const { views: angleViews, setAngleImage, clear: clearCache, setViews } = useTryOnCache(signature);
+  const { looks: savedLooks, save: saveLook, remove: removeSavedLook } = useSavedLooks();
+  const { items: history, push: pushHistory } = useOutfitHistory();
+
+  const restoreLook = useCallback((image: string, productIds: string[]) => {
+    // Restore outfit selection from a saved/history entry
+    const tryOnState: Record<string, string | null> = { top: null, bottom: null, shoes: null, bag: null };
+    productIds.forEach((id) => {
+      const p = products.find((x) => x.id === id);
+      if (p) tryOnState[p.category.toLowerCase()] = id;
+    });
+    Object.entries(tryOnState).forEach(([cat, id]) => setTryOn(cat, id));
+    setGeneratedImage(image);
+    setAngle('front');
+    toast({ title: 'Look restored', description: 'Outfit and preview loaded.' });
+  }, [setTryOn, setGeneratedImage]);
 
   const setZoom = useCallback((updater: (z: number) => number) => {
     setZoomState((z) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, updater(z))));
