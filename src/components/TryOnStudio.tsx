@@ -389,24 +389,7 @@ const TryOnStudio = () => {
             </div>
 
             {isGenerating ? (
-              <div className="flex flex-col items-center gap-4 animate-pulse">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-peach to-coral flex items-center justify-center text-4xl">
-                  ✨
-                </div>
-                <div className="text-center">
-                  <strong className="font-display text-lg block">AI is working its magic...</strong>
-                  <p className="text-sm text-muted-foreground mt-1">Generating your virtual try-on image</p>
-                </div>
-                <div className="flex gap-1 mt-2">
-                  {[0, 1, 2].map(i => (
-                    <div
-                      key={i}
-                      className="w-3 h-3 rounded-full bg-primary"
-                      style={{ animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
-                    />
-                  ))}
-                </div>
-              </div>
+              <GenerationProgress />
             ) : generatedImage && currentImage && userPhoto ? (
               <div className="relative w-full h-full flex flex-col items-center">
                 <ResultCanvas
