@@ -527,6 +527,19 @@ const TryOnStudio = () => {
                 🔗 Share
               </button>
               <button
+                onClick={() => {
+                  if (!currentImage) return;
+                  saveLook({
+                    image: currentImage,
+                    name: outfitName,
+                    productIds: selected.map((p) => p!.id),
+                  });
+                  toast({ title: '💖 Saved to My Looks', description: 'Find it in the gallery below.' });
+                }}
+                className="btn-secondary text-xs !py-2 !px-4"
+              >
+                💖 Save look
+              <button
                 onClick={clearCache}
                 className="btn-secondary text-xs !py-2 !px-4"
                 title="Clear cached angles for this outfit"
