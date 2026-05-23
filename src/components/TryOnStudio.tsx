@@ -10,6 +10,10 @@ import FloatingControls from './tryon/FloatingControls';
 import ResultCanvas from './tryon/ResultCanvas';
 import { downloadImage, shareImage } from './tryon/imageActions';
 import { useTryOnCache, buildSignature } from '@/hooks/useTryOnCache';
+import { useSavedLooks } from '@/hooks/useSavedLooks';
+import { useOutfitHistory } from '@/hooks/useOutfitHistory';
+import GenerationProgress from './tryon/GenerationProgress';
+import LooksGallery from './tryon/LooksGallery';
 import type { Angle } from './tryon/types';
 
 const MIN_ZOOM = 0.5;
@@ -56,6 +60,21 @@ const TryOnStudio = () => {
     [userPhoto, selected]
   );
   const { views: angleViews, setAngleImage, clear: clearCache, setViews } = useTryOnCache(signature);
+  const { looks: savedLooks, save: saveLook, remove: removeSavedLook } = useSavedLooks();
+  const { items: history, push: pushHistory } = useOutfitHistory();
+
+  const restoreLook = useCallback((image: string, productIds: string[]) => {
+    // Restore outfit selection from a saved/history entry
+    const tryOnState: Record<string, string | null> = { top: null, bottom: null, shoes: null, bag: null };
+    productIds.forEach((id) => {
+      const p = products.find((x) => x.id === id);
+      if (p) tryOnState[p.category.toLowerCase()] = id;
+    });
+    Object.entries(tryOnState).forEach(([cat, id]) => setTryOn(cat, id));
+    setGeneratedImage(image);
+    setAngle('front');
+    toast({ title: 'Look restored', description: 'Outfit and preview loaded.' });
+  }, [setTryOn, setGeneratedImage]);
 
   const setZoom = useCallback((updater: (z: number) => number) => {
     setZoomState((z) => Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, updater(z))));
@@ -149,6 +168,11 @@ const TryOnStudio = () => {
       if (data?.image) {
         setGeneratedImage(data.image);
         setAngleImage('front', data.image);
+        pushHistory({
+          image: data.image,
+          name: selected.map((p) => p!.name).join(' + '),
+          productIds: selected.map((p) => p!.id),
+        });
         toast({ title: '✨ Try-On Ready!', description: 'Your AI-generated outfit preview is ready.' });
       } else {
         toast({ title: 'No image generated', description: 'AI could not produce an image. Try a clearer full-body photo.', variant: 'destructive' });
@@ -365,24 +389,7 @@ const TryOnStudio = () => {
             </div>
 
             {isGenerating ? (
-              <div className="flex flex-col items-center gap-4 animate-pulse">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-peach to-coral flex items-center justify-center text-4xl">
-                  ✨
-                </div>
-                <div className="text-center">
-                  <strong className="font-display text-lg block">AI is working its magic...</strong>
-                  <p className="text-sm text-muted-foreground mt-1">Generating your virtual try-on image</p>
-                </div>
-                <div className="flex gap-1 mt-2">
-                  {[0, 1, 2].map(i => (
-                    <div
-                      key={i}
-                      className="w-3 h-3 rounded-full bg-primary"
-                      style={{ animation: `pulse 1.2s ease-in-out ${i * 0.2}s infinite` }}
-                    />
-                  ))}
-                </div>
-              </div>
+              <GenerationProgress />
             ) : generatedImage && currentImage && userPhoto ? (
               <div className="relative w-full h-full flex flex-col items-center">
                 <ResultCanvas
@@ -520,6 +527,20 @@ const TryOnStudio = () => {
                 🔗 Share
               </button>
               <button
+                onClick={() => {
+                  if (!currentImage) return;
+                  saveLook({
+                    image: currentImage,
+                    name: outfitName,
+                    productIds: selected.map((p) => p!.id),
+                  });
+                  toast({ title: '💖 Saved to My Looks', description: 'Find it in the gallery below.' });
+                }}
+                className="btn-secondary text-xs !py-2 !px-4"
+              >
+                💖 Save look
+              </button>
+              <button
                 onClick={clearCache}
                 className="btn-secondary text-xs !py-2 !px-4"
                 title="Clear cached angles for this outfit"
@@ -567,6 +588,17 @@ const TryOnStudio = () => {
           </div>
         </div>
       </div>
+
+      {/* Outfit history + saved looks */}
+      <LooksGallery
+        history={history}
+        saved={savedLooks}
+        onRestore={restoreLook}
+        onRemoveSaved={removeSavedLook}
+        onShare={shareImage}
+      />
+
+
 
       {/* Fullscreen lightbox */}
       {fullscreen && currentImage && (
