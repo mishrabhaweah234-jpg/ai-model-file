@@ -168,6 +168,11 @@ const TryOnStudio = () => {
       if (data?.image) {
         setGeneratedImage(data.image);
         setAngleImage('front', data.image);
+        pushHistory({
+          image: data.image,
+          name: selected.map((p) => p!.name).join(' + '),
+          productIds: selected.map((p) => p!.id),
+        });
         toast({ title: '✨ Try-On Ready!', description: 'Your AI-generated outfit preview is ready.' });
       } else {
         toast({ title: 'No image generated', description: 'AI could not produce an image. Try a clearer full-body photo.', variant: 'destructive' });
