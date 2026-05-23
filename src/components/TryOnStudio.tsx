@@ -589,6 +589,17 @@ const TryOnStudio = () => {
         </div>
       </div>
 
+      {/* Outfit history + saved looks */}
+      <LooksGallery
+        history={history}
+        saved={savedLooks}
+        onRestore={restoreLook}
+        onRemoveSaved={removeSavedLook}
+        onShare={shareImage}
+      />
+
+
+
       {/* Fullscreen lightbox */}
       {fullscreen && currentImage && (
         <div
