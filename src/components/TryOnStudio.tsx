@@ -10,6 +10,10 @@ import FloatingControls from './tryon/FloatingControls';
 import ResultCanvas from './tryon/ResultCanvas';
 import { downloadImage, shareImage } from './tryon/imageActions';
 import { useTryOnCache, buildSignature } from '@/hooks/useTryOnCache';
+import { useSavedLooks } from '@/hooks/useSavedLooks';
+import { useOutfitHistory } from '@/hooks/useOutfitHistory';
+import GenerationProgress from './tryon/GenerationProgress';
+import LooksGallery from './tryon/LooksGallery';
 import type { Angle } from './tryon/types';
 
 const MIN_ZOOM = 0.5;
