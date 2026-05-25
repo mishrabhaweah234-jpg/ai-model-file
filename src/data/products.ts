@@ -22,6 +22,18 @@ import w9Img from '@/assets/products/w9-knit.png';
 import w10Img from '@/assets/products/w10-pleated.png';
 import w11Img from '@/assets/products/w11-boots.png';
 import w12Img from '@/assets/products/w12-quilted.png';
+import m13Img from '@/assets/products/m13-kurta.png';
+import m14Img from '@/assets/products/m14-dhaka.png';
+import m15Img from '@/assets/products/m15-blazer.png';
+import m16Img from '@/assets/products/m16-tennis.png';
+import m17Img from '@/assets/products/m17-baggy.png';
+import m18Img from '@/assets/products/m18-varsity.png';
+import w13Img from '@/assets/products/w13-lehenga.png';
+import w14Img from '@/assets/products/w14-kurti.png';
+import w15Img from '@/assets/products/w15-trench.png';
+import w16Img from '@/assets/products/w16-pearlblouse.png';
+import w17Img from '@/assets/products/w17-babytee.png';
+import w18Img from '@/assets/products/w18-microskirt.png';
 
 export interface Product {
   id: string;
