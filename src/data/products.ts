@@ -14,6 +14,14 @@ import w5Img from '@/assets/products/w5-dress.jpg';
 import w6Img from '@/assets/products/w5-palazzo.jpg';
 import w7Img from '@/assets/products/w6-sneakers.jpg';
 import w8Img from '@/assets/products/w6-tote.jpg';
+import m9Img from '@/assets/products/m9-hoodie.png';
+import m10Img from '@/assets/products/m10-joggers.png';
+import m11Img from '@/assets/products/m11-fieldjacket.png';
+import m12Img from '@/assets/products/m12-hightops.png';
+import w9Img from '@/assets/products/w9-knit.png';
+import w10Img from '@/assets/products/w10-pleated.png';
+import w11Img from '@/assets/products/w11-boots.png';
+import w12Img from '@/assets/products/w12-quilted.png';
 
 export interface Product {
   id: string;
@@ -145,9 +153,65 @@ export const products: Product[] = [
     shape: "bag", description: "Spacious tan leather tote for work and weekend.", badge: "Versatile",
     image: w8Img
   },
+  {
+    id: "m9", name: "Crimson Pulse Hoodie", brand: "Urban Axis", audience: "Men",
+    category: "Top", price: 1799, originalPrice: 2799, rating: 4.7,
+    color: "#dc2626", background: "linear-gradient(145deg, #ffd5d5 0%, #dc2626 100%)",
+    shape: "top", description: "Oversized fleece hoodie with bold crimson energy.", badge: "Fan Favorite",
+    image: m9Img
+  },
+  {
+    id: "m10", name: "Onyx Track Joggers", brand: "Kickline", audience: "Men",
+    category: "Bottom", price: 1599, originalPrice: 2499, rating: 4.6,
+    color: "#111111", background: "linear-gradient(145deg, #cccccc 0%, #111111 100%)",
+    shape: "bottom", description: "Tapered athleisure joggers with sleek side stripes.", badge: "Active",
+    image: m10Img
+  },
+  {
+    id: "m11", name: "Field Olive Jacket", brand: "Muse Man", audience: "Men",
+    category: "Top", price: 3299, originalPrice: 4999, rating: 4.8,
+    color: "#6b7d3a", background: "linear-gradient(145deg, #d8dcb8 0%, #6b7d3a 100%)",
+    shape: "top", description: "Heritage utility jacket with multi-pocket field styling.", badge: "Heritage",
+    image: m11Img
+  },
+  {
+    id: "m12", name: "Court High-Top Sneakers", brand: "Kickline", audience: "Men",
+    category: "Shoes", price: 2299, originalPrice: 3499, rating: 4.5,
+    color: "#f4f4f4", background: "linear-gradient(145deg, #ffffff 0%, #d4d4d4 100%)",
+    shape: "shoes", description: "Classic canvas high-tops for everyday street style.", badge: "Iconic",
+    image: m12Img
+  },
+  {
+    id: "w9", name: "Blush Cloud Knit", brand: "Petal Theory", audience: "Women",
+    category: "Top", price: 2099, originalPrice: 3299, rating: 4.7,
+    color: "#f5b8c8", background: "linear-gradient(145deg, #ffe5ec 0%, #f5b8c8 100%)",
+    shape: "top", description: "Chunky cable-knit sweater in soft blush tones.", badge: "Cozy",
+    image: w9Img
+  },
+  {
+    id: "w10", name: "Crimson Pleated Midi", brand: "Muse Edit", audience: "Women",
+    category: "Bottom", price: 1999, originalPrice: 3099, rating: 4.6,
+    color: "#b91c4a", background: "linear-gradient(145deg, #f4c2d2 0%, #b91c4a 100%)",
+    shape: "bottom", description: "Flowing pleated midi skirt in rich crimson satin.", badge: "Statement",
+    image: w10Img
+  },
+  {
+    id: "w11", name: "Noir Block Boots", brand: "Step Story", audience: "Women",
+    category: "Shoes", price: 3499, originalPrice: 5299, rating: 4.9,
+    color: "#0d0d0d", background: "linear-gradient(145deg, #bfbfbf 0%, #0d0d0d 100%)",
+    shape: "shoes", description: "Sleek leather ankle boots with sculpted block heel.", badge: "Premium",
+    image: w11Img
+  },
+  {
+    id: "w12", name: "Onyx Quilted Crossbody", brand: "Carry Muse", audience: "Women",
+    category: "Bag", price: 2799, originalPrice: 4399, rating: 4.8,
+    color: "#1a1a1a", background: "linear-gradient(145deg, #d4d4d4 0%, #1a1a1a 100%)",
+    shape: "bag", description: "Quilted leather crossbody with elegant chain strap.", badge: "Luxe",
+    image: w12Img
+  },
 ];
 
-export const arrivalIds = ["w1", "m1", "w5", "m5", "w2", "m3", "w3", "m4"];
+export const arrivalIds = ["w9", "m9", "w11", "m11", "w10", "m12", "w12", "m10"];
 
 export const skinTones = ["#f5cdb3", "#d8ab8f", "#b77b57", "#7d4d36"];
 
