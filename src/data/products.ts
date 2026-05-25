@@ -221,9 +221,93 @@ export const products: Product[] = [
     shape: "bag", description: "Quilted leather crossbody with elegant chain strap.", badge: "Luxe",
     image: w12Img
   },
+  {
+    id: "m13", name: "Ivory Zari Long Kurta", brand: "Heritage Loom", audience: "Men",
+    category: "Top", price: 3499, originalPrice: 5499, rating: 4.8,
+    color: "#f3e7c8", background: "linear-gradient(145deg, #fff7e0 0%, #d4b87a 100%)",
+    shape: "top", description: "Hand-embroidered long kurta with golden thread detailing.", badge: "Festive",
+    image: m13Img
+  },
+  {
+    id: "m14", name: "Sunset Weave Waistcoat", brand: "Heritage Loom", audience: "Men",
+    category: "Top", price: 2599, originalPrice: 3999, rating: 4.7,
+    color: "#c2552d", background: "linear-gradient(145deg, #f4d2b8 0%, #c2552d 100%)",
+    shape: "top", description: "Handwoven patterned waistcoat with rich earthy motifs.", badge: "Artisan",
+    image: m14Img
+  },
+  {
+    id: "m15", name: "Regatta Gold-Button Blazer", brand: "Atelier Park", audience: "Men",
+    category: "Top", price: 5499, originalPrice: 7999, rating: 4.9,
+    color: "#1a2b56", background: "linear-gradient(145deg, #c6cee5 0%, #1a2b56 100%)",
+    shape: "top", description: "Double-breasted navy wool blazer with polished gold buttons.", badge: "Timeless",
+    image: m15Img
+  },
+  {
+    id: "m16", name: "Court Cable V-Neck", brand: "Atelier Park", audience: "Men",
+    category: "Top", price: 2899, originalPrice: 4299, rating: 4.7,
+    color: "#efe6cf", background: "linear-gradient(145deg, #f7f0d8 0%, #c9b88a 100%)",
+    shape: "top", description: "Cream cable-knit V-neck with classic varsity striping.", badge: "Heritage",
+    image: m16Img
+  },
+  {
+    id: "m17", name: "Slouch Cargo Denim", brand: "Loop State", audience: "Men",
+    category: "Bottom", price: 2299, originalPrice: 3499, rating: 4.6,
+    color: "#6a7a90", background: "linear-gradient(145deg, #cdd5e0 0%, #4a5670 100%)",
+    shape: "bottom", description: "Relaxed wide-leg cargo denim with multi-pocket utility.", badge: "Trending",
+    image: m17Img
+  },
+  {
+    id: "m18", name: "Lilac Patch Varsity", brand: "Loop State", audience: "Men",
+    category: "Top", price: 3199, originalPrice: 4799, rating: 4.5,
+    color: "#d8b5e8", background: "linear-gradient(145deg, #f3e5fa 0%, #c9a2dc 100%)",
+    shape: "top", description: "Oversized pastel varsity jacket with chenille patches.", badge: "Drop Pick",
+    image: m18Img
+  },
+  {
+    id: "w13", name: "Rose Mirror Lehenga Set", brand: "Heritage Loom", audience: "Women",
+    category: "Top", price: 6499, originalPrice: 9999, rating: 4.9,
+    color: "#e6308e", background: "linear-gradient(145deg, #ffd4ea 0%, #e6308e 100%)",
+    shape: "top", description: "Vibrant embroidered blouse and skirt set with delicate mirror work.", badge: "Festive",
+    image: w13Img
+  },
+  {
+    id: "w14", name: "Garden Bloom Kurti", brand: "Heritage Loom", audience: "Women",
+    category: "Top", price: 2199, originalPrice: 3399, rating: 4.7,
+    color: "#2f8a4e", background: "linear-gradient(145deg, #c5e6cf 0%, #2f8a4e 100%)",
+    shape: "top", description: "Flowy emerald kurti with floral motifs and tasselled tie.", badge: "Everyday",
+    image: w14Img
+  },
+  {
+    id: "w15", name: "Camel Belted Trench", brand: "Atelier Park", audience: "Women",
+    category: "Top", price: 4999, originalPrice: 7499, rating: 4.9,
+    color: "#c08a52", background: "linear-gradient(145deg, #f4dcc0 0%, #c08a52 100%)",
+    shape: "top", description: "Tailored camel trench coat with sculpted belted waist.", badge: "Timeless",
+    image: w15Img
+  },
+  {
+    id: "w16", name: "Ivory Ruffle Silk Blouse", brand: "Atelier Park", audience: "Women",
+    category: "Top", price: 2799, originalPrice: 4199, rating: 4.7,
+    color: "#f8f1e4", background: "linear-gradient(145deg, #fff9ef 0%, #e3d9c4 100%)",
+    shape: "top", description: "Soft silk blouse with romantic ruffled collar.", badge: "Editor's Pick",
+    image: w16Img
+  },
+  {
+    id: "w17", name: "Butter Crop Baby Tee", brand: "Loop State", audience: "Women",
+    category: "Top", price: 1199, originalPrice: 1899, rating: 4.6,
+    color: "#fbe89a", background: "linear-gradient(145deg, #fff6cf 0%, #f5d96a 100%)",
+    shape: "top", description: "Ribbed cropped baby tee in soft buttercream yellow.", badge: "Drop Pick",
+    image: w17Img
+  },
+  {
+    id: "w18", name: "Frayed Denim Mini", brand: "Loop State", audience: "Women",
+    category: "Bottom", price: 1599, originalPrice: 2499, rating: 4.5,
+    color: "#6a8db5", background: "linear-gradient(145deg, #cdddee 0%, #5a7da5 100%)",
+    shape: "bottom", description: "Low-rise denim mini with raw frayed hem.", badge: "Trending",
+    image: w18Img
+  },
 ];
 
-export const arrivalIds = ["w9", "m9", "w11", "m11", "w10", "m12", "w12", "m10"];
+export const arrivalIds = ["w13", "m13", "w15", "m15", "w17", "m17", "w14", "m18"];
 
 export const skinTones = ["#f5cdb3", "#d8ab8f", "#b77b57", "#7d4d36"];
 
