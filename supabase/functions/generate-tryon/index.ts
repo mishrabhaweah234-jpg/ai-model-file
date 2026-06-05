@@ -6,12 +6,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Convert a data URL or http(s) URL into { mimeType, base64 } for Google's inlineData format.
-async function toInlineData(src: string): Promise<{ mimeType: string; data: string }> {
+async function toDataUrl(src: string): Promise<string> {
   if (src.startsWith("data:")) {
-    const match = src.match(/^data:([^;]+);base64,(.*)$/);
-    if (!match) throw new Error("Invalid data URL");
-    return { mimeType: match[1], data: match[2] };
+    return src;
   }
   const resp = await fetch(src);
   if (!resp.ok) throw new Error(`Failed to fetch image: ${resp.status}`);
@@ -20,7 +17,7 @@ async function toInlineData(src: string): Promise<{ mimeType: string; data: stri
   let bin = "";
   for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
   const data = btoa(bin);
-  return { mimeType, data };
+  return `data:${mimeType};base64,${data}`;
 }
 
 serve(async (req) => {
@@ -38,9 +35,9 @@ serve(async (req) => {
       );
     }
 
-    const GOOGLE_AI_API_KEY = Deno.env.get("GOOGLE_AI_API_KEY");
-    if (!GOOGLE_AI_API_KEY) {
-      throw new Error("GOOGLE_AI_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     const clothingDescription = selectedItems
@@ -58,7 +55,7 @@ serve(async (req) => {
     const angleText = angleInstructions[angle] || angleInstructions.front;
 
     const sourceImage = baseImage || userPhoto;
-    const inline = await toInlineData(sourceImage);
+    const imageDataUrl = await toDataUrl(sourceImage);
 
     const prompt = `You are a virtual fashion try-on assistant. Take this photo of a person and generate a realistic image of them wearing the following outfit: ${clothingDescription}.
 
@@ -77,42 +74,40 @@ PERSON & OUTFIT:
 - Make the outfit look realistic, well-fitted, and naturally lit.
 - The result should look like a high-quality vertical fashion editorial photo.`;
 
-    // Google AI Studio (Gemini) image generation endpoint — free tier available.
-    const model = "gemini-2.5-flash-image";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GOOGLE_AI_API_KEY}`;
-
-    const response = await fetch(url, {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/images/generations", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        contents: [
+        model: "google/gemini-2.5-flash-image",
+        messages: [
           {
             role: "user",
-            parts: [
-              { text: prompt },
-              { inlineData: { mimeType: inline.mimeType, data: inline.data } },
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: imageDataUrl } },
             ],
           },
         ],
-        generationConfig: {
-          responseModalities: ["IMAGE", "TEXT"],
-        },
+        modalities: ["image", "text"],
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Google AI error:", response.status, errorText);
+      console.error("AI Gateway error:", response.status, errorText);
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: "Rate limit exceeded on the free tier. Please wait a minute and try again." }),
+          JSON.stringify({ error: "Rate limits exceeded, please try again later." }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: "Google AI API key is invalid or lacks access to the image model." }),
-          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Payment required, please add funds to your Lovable AI workspace." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
       return new Response(
@@ -122,27 +117,19 @@ PERSON & OUTFIT:
     }
 
     const data = await response.json();
-    const parts = data?.candidates?.[0]?.content?.parts ?? [];
-    let generatedImageUrl: string | undefined;
-    let textResponse: string | undefined;
-    for (const part of parts) {
-      if (part.inlineData?.data) {
-        const mime = part.inlineData.mimeType || "image/png";
-        generatedImageUrl = `data:${mime};base64,${part.inlineData.data}`;
-      } else if (part.text) {
-        textResponse = (textResponse ?? "") + part.text;
-      }
-    }
+    const b64 = data?.data?.[0]?.b64_json;
 
-    if (!generatedImageUrl) {
+    if (!b64) {
       return new Response(
-        JSON.stringify({ error: "AI could not generate an image. Try a different photo or outfit.", textResponse }),
+        JSON.stringify({ error: "AI could not generate an image. Try a different photo or outfit." }),
         { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
+    const generatedImageUrl = `data:image/png;base64,${b64}`;
+
     return new Response(
-      JSON.stringify({ image: generatedImageUrl, message: textResponse }),
+      JSON.stringify({ image: generatedImageUrl }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (e) {
