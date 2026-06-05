@@ -78,7 +78,7 @@ PERSON & OUTFIT:
 - The result should look like a high-quality vertical fashion editorial photo.`;
 
     // Google AI Studio (Gemini) image generation endpoint — free tier available.
-    const model = "gemini-2.5-flash-image-preview";
+    const model = "gemini-2.5-flash-image";
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GOOGLE_AI_API_KEY}`;
 
     const response = await fetch(url, {
