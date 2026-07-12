@@ -34,6 +34,12 @@ import w15Img from '@/assets/products/w15-trench.png';
 import w16Img from '@/assets/products/w16-pearlblouse.png';
 import w17Img from '@/assets/products/w17-babytee.png';
 import w18Img from '@/assets/products/w18-microskirt.png';
+import m19Img from '@/assets/products/m19-graphictee.png';
+import m20Img from '@/assets/products/m20-overcoat.png';
+import m21Img from '@/assets/products/m21-derby.png';
+import w19Img from '@/assets/products/w19-slipdress.png';
+import w20Img from '@/assets/products/w20-puffer.png';
+import w21Img from '@/assets/products/w21-widetrouser.png';
 
 export interface Product {
   id: string;
@@ -305,9 +311,51 @@ export const products: Product[] = [
     shape: "bottom", description: "Low-rise denim mini with raw frayed hem.", badge: "Trending",
     image: w18Img
   },
+  {
+    id: "m19", name: "Static Print Oversized Tee", brand: "Loop State", audience: "Men",
+    category: "Top", price: 1299, originalPrice: 1999, rating: 4.6,
+    color: "#1a1a1a", background: "linear-gradient(145deg, #d4d4d4 0%, #1a1a1a 100%)",
+    shape: "top", description: "Washed black oversized tee with bold abstract graphic.", badge: "Drop Pick",
+    image: m19Img
+  },
+  {
+    id: "m20", name: "Charcoal Long Overcoat", brand: "Atelier Park", audience: "Men",
+    category: "Top", price: 6499, originalPrice: 9499, rating: 4.9,
+    color: "#3a3a3a", background: "linear-gradient(145deg, #c4c4c4 0%, #2a2a2a 100%)",
+    shape: "top", description: "Tailored wool overcoat with minimal luxury detailing.", badge: "Premium",
+    image: m20Img
+  },
+  {
+    id: "m21", name: "Cognac Derby Shoes", brand: "Kickline", audience: "Men",
+    category: "Shoes", price: 3599, originalPrice: 5299, rating: 4.8,
+    color: "#8b3e1f", background: "linear-gradient(145deg, #e6c4a8 0%, #8b3e1f 100%)",
+    shape: "shoes", description: "Polished cognac leather derbies for smart tailoring.", badge: "Classic",
+    image: m21Img
+  },
+  {
+    id: "w19", name: "Champagne Satin Slip Dress", brand: "Muse Edit", audience: "Women",
+    category: "Top", price: 2999, originalPrice: 4599, rating: 4.8,
+    color: "#e8b56a", background: "linear-gradient(145deg, #fbe6bf 0%, #d49a44 100%)",
+    shape: "top", description: "Bias-cut satin midi slip in soft champagne gold.", badge: "Evening",
+    image: w19Img
+  },
+  {
+    id: "w20", name: "Chrome Cropped Puffer", brand: "Loop State", audience: "Women",
+    category: "Top", price: 3499, originalPrice: 5299, rating: 4.7,
+    color: "#c9ccd1", background: "linear-gradient(145deg, #f0f2f5 0%, #a8adb5 100%)",
+    shape: "top", description: "High-shine metallic silver cropped puffer.", badge: "Trending",
+    image: w20Img
+  },
+  {
+    id: "w21", name: "Ivory Wide-Leg Trousers", brand: "Atelier Park", audience: "Women",
+    category: "Bottom", price: 2399, originalPrice: 3699, rating: 4.7,
+    color: "#f0e8d5", background: "linear-gradient(145deg, #faf5e6 0%, #d8ccb0 100%)",
+    shape: "bottom", description: "Fluid pleated wide-leg trousers in cream ivory.", badge: "Editor's Pick",
+    image: w21Img
+  },
 ];
 
-export const arrivalIds = ["w13", "m13", "w15", "m15", "w17", "m17", "w14", "m18"];
+export const arrivalIds = ["w19", "m20", "w20", "m19", "w21", "m21", "w13", "m13"];
 
 export const skinTones = ["#f5cdb3", "#d8ab8f", "#b77b57", "#7d4d36"];
 
