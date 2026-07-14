@@ -59,8 +59,8 @@ export const useStore = create<AppState>((set, get) => ({
   isGenerating: false,
   generatedImage: null,
 
-  addToBag: (id) => set((s) => ({ bag: [id, ...s.bag], cartOpen: true })),
-  removeFromBag: (id) => set((s) => ({ bag: s.bag.filter((b) => b !== id) })),
+  addToBag: (id, opts) => set((s) => ({ bag: [{ id, ...opts }, ...s.bag], cartOpen: true })),
+  removeFromBag: (index) => set((s) => ({ bag: s.bag.filter((_, i) => i !== index) })),
   setTryOn: (category, id) => set((s) => ({ tryOn: { ...s.tryOn, [category]: id }, generatedImage: null })),
   setTone: (tone) => set({ selectedTone: tone }),
   setBackdrop: (id) => set({ selectedBackdrop: id }),
