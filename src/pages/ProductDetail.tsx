@@ -190,7 +190,12 @@ const ProductDetail = () => {
               <div className="space-y-3">
                 <div className="flex gap-3">
                   <button
-                    onClick={() => addToBag(product.id)}
+                    onClick={() => addToBag(product.id, {
+                      size: selectedSize,
+                      color: availableColors?.[selectedColorIdx]?.name,
+                      colorValue: availableColors?.[selectedColorIdx]?.value ?? product.color,
+                      price: displayPrice,
+                    })}
                     className="btn-primary flex-1 text-sm !py-3"
                   >
                     🛒 Add to Bag — {selectedSize}{availableColors ? ` · ${availableColors[selectedColorIdx].name}` : ''} · Rs {displayPrice.toLocaleString()}
