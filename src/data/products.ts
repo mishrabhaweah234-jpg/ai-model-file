@@ -41,6 +41,12 @@ import w19Img from '@/assets/products/w19-slipdress.png';
 import w20Img from '@/assets/products/w20-puffer.png';
 import w21Img from '@/assets/products/w21-widetrouser.png';
 
+export interface ColorVariant {
+  name: string;
+  value: string;
+  priceDelta?: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -56,6 +62,8 @@ export interface Product {
   description: string;
   badge: string;
   image: string;
+  sizes?: string[];
+  colors?: ColorVariant[];
 }
 
 export const products: Product[] = [
