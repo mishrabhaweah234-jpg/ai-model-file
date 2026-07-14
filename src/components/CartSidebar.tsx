@@ -28,20 +28,24 @@ const CartSidebar = () => {
         </div>
 
         <div className="overflow-y-auto space-y-3">
-          {bagProducts.length === 0 ? (
+          {bagItems.length === 0 ? (
             <p className="text-muted-foreground text-sm text-center py-10">Your bag is empty right now.</p>
           ) : (
-            bagProducts.map((p, i) => (
-              <article key={`${p!.id}-${i}`} className="flex items-center gap-3 glass-surface !rounded-2xl p-3">
-                <img src={p!.image} alt={p!.name} className="w-12 h-12 rounded-xl flex-shrink-0 object-contain bg-muted/30" loading="lazy" />
-                <div className="flex-1 min-w-0">
-                  <strong className="text-sm block truncate">{p!.name}</strong>
-                  <p className="text-xs text-muted-foreground">{p!.brand} | Qty 1</p>
-                </div>
-                <strong className="text-sm whitespace-nowrap">Rs {p!.price}</strong>
-                <button onClick={() => removeFromBag(p!.id)} className="text-xs text-muted-foreground hover:text-destructive">✕</button>
-              </article>
-            ))
+            bagItems.map(({ item, product: p }, i) => {
+              const linePrice = item.price ?? p!.price;
+              const meta = [item.size, item.color].filter(Boolean).join(' · ');
+              return (
+                <article key={`${p!.id}-${i}`} className="flex items-center gap-3 glass-surface !rounded-2xl p-3">
+                  <img src={p!.image} alt={p!.name} className="w-12 h-12 rounded-xl flex-shrink-0 object-contain bg-muted/30" loading="lazy" />
+                  <div className="flex-1 min-w-0">
+                    <strong className="text-sm block truncate">{p!.name}</strong>
+                    <p className="text-xs text-muted-foreground truncate">{p!.brand}{meta ? ` · ${meta}` : ''} · Qty 1</p>
+                  </div>
+                  <strong className="text-sm whitespace-nowrap">Rs {linePrice.toLocaleString()}</strong>
+                  <button onClick={() => removeFromBag(i)} className="text-xs text-muted-foreground hover:text-destructive">✕</button>
+                </article>
+              );
+            })
           )}
         </div>
 
