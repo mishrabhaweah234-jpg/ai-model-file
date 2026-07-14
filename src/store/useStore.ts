@@ -8,8 +8,16 @@ interface TryOn {
   bag: string | null;
 }
 
+export interface BagItem {
+  id: string;
+  size?: string;
+  color?: string;
+  colorValue?: string;
+  price?: number;
+}
+
 interface AppState {
-  bag: string[];
+  bag: BagItem[];
   tryOn: TryOn;
   selectedTone: string;
   selectedBackdrop: string;
@@ -21,8 +29,8 @@ interface AppState {
   isGenerating: boolean;
   generatedImage: string | null;
 
-  addToBag: (id: string) => void;
-  removeFromBag: (id: string) => void;
+  addToBag: (id: string, opts?: Omit<BagItem, 'id'>) => void;
+  removeFromBag: (index: number) => void;
   setTryOn: (category: string, id: string | null) => void;
   setTone: (tone: string) => void;
   setBackdrop: (id: string) => void;
