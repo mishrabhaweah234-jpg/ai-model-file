@@ -8,8 +8,16 @@ interface TryOn {
   bag: string | null;
 }
 
+export interface BagItem {
+  id: string;
+  size?: string;
+  color?: string;
+  colorValue?: string;
+  price?: number;
+}
+
 interface AppState {
-  bag: string[];
+  bag: BagItem[];
   tryOn: TryOn;
   selectedTone: string;
   selectedBackdrop: string;
@@ -21,8 +29,8 @@ interface AppState {
   isGenerating: boolean;
   generatedImage: string | null;
 
-  addToBag: (id: string) => void;
-  removeFromBag: (id: string) => void;
+  addToBag: (id: string, opts?: Omit<BagItem, 'id'>) => void;
+  removeFromBag: (index: number) => void;
   setTryOn: (category: string, id: string | null) => void;
   setTone: (tone: string) => void;
   setBackdrop: (id: string) => void;
@@ -51,8 +59,8 @@ export const useStore = create<AppState>((set, get) => ({
   isGenerating: false,
   generatedImage: null,
 
-  addToBag: (id) => set((s) => ({ bag: [id, ...s.bag], cartOpen: true })),
-  removeFromBag: (id) => set((s) => ({ bag: s.bag.filter((b) => b !== id) })),
+  addToBag: (id, opts) => set((s) => ({ bag: [{ id, ...opts }, ...s.bag], cartOpen: true })),
+  removeFromBag: (index) => set((s) => ({ bag: s.bag.filter((_, i) => i !== index) })),
   setTryOn: (category, id) => set((s) => ({ tryOn: { ...s.tryOn, [category]: id }, generatedImage: null })),
   setTone: (tone) => set({ selectedTone: tone }),
   setBackdrop: (id) => set({ selectedBackdrop: id }),
@@ -79,6 +87,6 @@ export const useStore = create<AppState>((set, get) => ({
       generatedImage: null,
     });
   },
-  bagTotal: () => get().bag.reduce((t, id) => t + (products.find(p => p.id === id)?.price || 0), 0),
+  bagTotal: () => get().bag.reduce((t, item) => t + (item.price ?? products.find(p => p.id === item.id)?.price ?? 0), 0),
   findProduct: (id) => products.find(p => p.id === id),
 }));
