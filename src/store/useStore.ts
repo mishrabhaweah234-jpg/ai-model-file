@@ -87,6 +87,6 @@ export const useStore = create<AppState>((set, get) => ({
       generatedImage: null,
     });
   },
-  bagTotal: () => get().bag.reduce((t, id) => t + (products.find(p => p.id === id)?.price || 0), 0),
+  bagTotal: () => get().bag.reduce((t, item) => t + (item.price ?? products.find(p => p.id === item.id)?.price ?? 0), 0),
   findProduct: (id) => products.find(p => p.id === id),
 }));
