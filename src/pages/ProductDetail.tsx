@@ -7,16 +7,18 @@ import CartSidebar from '@/components/CartSidebar';
 import AuthModal from '@/components/AuthModal';
 import { useState } from 'react';
 
-const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const defaultSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToBag, setTryOn } = useStore();
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [imageZoomed, setImageZoomed] = useState(false);
-
   const product = products.find(p => p.id === id);
+  const availableSizes = product?.sizes ?? defaultSizes;
+  const availableColors = product?.colors;
+  const [selectedSize, setSelectedSize] = useState(availableSizes[Math.min(2, availableSizes.length - 1)]);
+  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
+  const [imageZoomed, setImageZoomed] = useState(false);
 
   if (!product) {
     return (
@@ -31,6 +33,8 @@ const ProductDetail = () => {
     );
   }
 
+  const priceDelta = availableColors?.[selectedColorIdx]?.priceDelta ?? 0;
+  const displayPrice = product.price + priceDelta;
   const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
 
   // Related products: same audience, different id, max 4
@@ -115,7 +119,7 @@ const ProductDetail = () => {
 
                 {/* Price */}
                 <div className="flex items-baseline gap-3 mb-6">
-                  <strong className="text-3xl">Rs {product.price.toLocaleString()}</strong>
+                  <strong className="text-3xl">Rs {displayPrice.toLocaleString()}</strong>
                   <span className="text-lg line-through text-muted-foreground">Rs {product.originalPrice.toLocaleString()}</span>
                   <span className="badge-tag text-xs !py-1 !px-2.5 !bg-secondary !text-secondary-foreground">
                     {discount}% OFF
@@ -138,11 +142,11 @@ const ProductDetail = () => {
                 <div className="mb-6">
                   <span className="eyebrow">Select size</span>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {sizes.map(size => (
+                    {availableSizes.map(size => (
                       <button
                         key={size}
                         onClick={() => setSelectedSize(size)}
-                        className={`w-12 h-12 rounded-2xl border-2 text-sm font-semibold transition-all ${
+                        className={`min-w-12 h-12 px-3 rounded-2xl border-2 text-sm font-semibold transition-all ${
                           selectedSize === size
                             ? 'border-primary bg-primary/10 text-primary scale-105'
                             : 'border-border bg-card hover:bg-muted text-foreground'
@@ -157,13 +161,27 @@ const ProductDetail = () => {
 
                 {/* Color swatch */}
                 <div className="mb-6">
-                  <span className="eyebrow">Color</span>
-                  <div className="flex items-center gap-3 mt-2">
-                    <div
-                      className="w-8 h-8 rounded-full border-2 border-primary ring-2 ring-primary/30"
-                      style={{ background: product.color }}
-                    />
-                    <span className="text-sm text-muted-foreground">Selected</span>
+                  <span className="eyebrow">Color{availableColors ? ` — ${availableColors[selectedColorIdx].name}` : ''}</span>
+                  <div className="flex items-center gap-3 mt-2 flex-wrap">
+                    {availableColors ? (
+                      availableColors.map((c, i) => (
+                        <button
+                          key={c.name}
+                          onClick={() => setSelectedColorIdx(i)}
+                          title={c.name + (c.priceDelta ? ` (+Rs ${c.priceDelta})` : '')}
+                          className={`w-9 h-9 rounded-full border-2 transition-all ${
+                            i === selectedColorIdx ? 'border-primary ring-2 ring-primary/30 scale-110' : 'border-border hover:scale-105'
+                          }`}
+                          style={{ background: c.value }}
+                          aria-label={c.name}
+                        />
+                      ))
+                    ) : (
+                      <div
+                        className="w-8 h-8 rounded-full border-2 border-primary ring-2 ring-primary/30"
+                        style={{ background: product.color }}
+                      />
+                    )}
                   </div>
                 </div>
               </div>
@@ -175,7 +193,7 @@ const ProductDetail = () => {
                     onClick={() => addToBag(product.id)}
                     className="btn-primary flex-1 text-sm !py-3"
                   >
-                    🛒 Add to Bag — Size {selectedSize}
+                    🛒 Add to Bag — {selectedSize}{availableColors ? ` · ${availableColors[selectedColorIdx].name}` : ''} · Rs {displayPrice.toLocaleString()}
                   </button>
                 </div>
                 <button
