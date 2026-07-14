@@ -324,42 +324,78 @@ export const products: Product[] = [
     category: "Top", price: 1299, originalPrice: 1999, rating: 4.6,
     color: "#1a1a1a", background: "linear-gradient(145deg, #d4d4d4 0%, #1a1a1a 100%)",
     shape: "top", description: "Washed black oversized tee with bold abstract graphic.", badge: "Drop Pick",
-    image: m19Img
+    image: m19Img,
+    sizes: ["S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "Washed Black", value: "#1a1a1a" },
+      { name: "Bone White", value: "#f4f0e6" },
+      { name: "Faded Olive", value: "#6b7d3a" },
+    ],
   },
   {
     id: "m20", name: "Charcoal Long Overcoat", brand: "Atelier Park", audience: "Men",
     category: "Top", price: 6499, originalPrice: 9499, rating: 4.9,
     color: "#3a3a3a", background: "linear-gradient(145deg, #c4c4c4 0%, #2a2a2a 100%)",
     shape: "top", description: "Tailored wool overcoat with minimal luxury detailing.", badge: "Premium",
-    image: m20Img
+    image: m20Img,
+    sizes: ["S", "M", "L", "XL"],
+    colors: [
+      { name: "Charcoal", value: "#3a3a3a" },
+      { name: "Camel", value: "#c08a52", priceDelta: 300 },
+      { name: "Midnight Navy", value: "#1a2b56" },
+    ],
   },
   {
     id: "m21", name: "Cognac Derby Shoes", brand: "Kickline", audience: "Men",
     category: "Shoes", price: 3599, originalPrice: 5299, rating: 4.8,
     color: "#8b3e1f", background: "linear-gradient(145deg, #e6c4a8 0%, #8b3e1f 100%)",
     shape: "shoes", description: "Polished cognac leather derbies for smart tailoring.", badge: "Classic",
-    image: m21Img
+    image: m21Img,
+    sizes: ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"],
+    colors: [
+      { name: "Cognac", value: "#8b3e1f" },
+      { name: "Espresso", value: "#3d2817" },
+      { name: "Oxblood", value: "#5c1f24", priceDelta: 200 },
+    ],
   },
   {
     id: "w19", name: "Champagne Satin Slip Dress", brand: "Muse Edit", audience: "Women",
     category: "Top", price: 2999, originalPrice: 4599, rating: 4.8,
     color: "#e8b56a", background: "linear-gradient(145deg, #fbe6bf 0%, #d49a44 100%)",
     shape: "top", description: "Bias-cut satin midi slip in soft champagne gold.", badge: "Evening",
-    image: w19Img
+    image: w19Img,
+    sizes: ["XS", "S", "M", "L", "XL"],
+    colors: [
+      { name: "Champagne", value: "#e8b56a" },
+      { name: "Rose Blush", value: "#f5b8c8" },
+      { name: "Deep Emerald", value: "#2e8b57", priceDelta: 150 },
+    ],
   },
   {
     id: "w20", name: "Chrome Cropped Puffer", brand: "Loop State", audience: "Women",
     category: "Top", price: 3499, originalPrice: 5299, rating: 4.7,
     color: "#c9ccd1", background: "linear-gradient(145deg, #f0f2f5 0%, #a8adb5 100%)",
     shape: "top", description: "High-shine metallic silver cropped puffer.", badge: "Trending",
-    image: w20Img
+    image: w20Img,
+    sizes: ["XS", "S", "M", "L"],
+    colors: [
+      { name: "Chrome Silver", value: "#c9ccd1" },
+      { name: "Jet Black", value: "#0d0d0d" },
+      { name: "Iridescent Lilac", value: "#d8b5e8", priceDelta: 250 },
+    ],
   },
   {
     id: "w21", name: "Ivory Wide-Leg Trousers", brand: "Atelier Park", audience: "Women",
     category: "Bottom", price: 2399, originalPrice: 3699, rating: 4.7,
     color: "#f0e8d5", background: "linear-gradient(145deg, #faf5e6 0%, #d8ccb0 100%)",
     shape: "bottom", description: "Fluid pleated wide-leg trousers in cream ivory.", badge: "Editor's Pick",
-    image: w21Img
+    image: w21Img,
+    sizes: ["XS", "S", "M", "L", "XL"],
+    colors: [
+      { name: "Ivory Cream", value: "#f0e8d5" },
+      { name: "Slate Grey", value: "#6a7a90" },
+      { name: "Espresso", value: "#3d2817" },
+    ],
   },
 ];
 
