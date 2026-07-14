@@ -33,6 +33,8 @@ const ProductDetail = () => {
     );
   }
 
+  const priceDelta = availableColors?.[selectedColorIdx]?.priceDelta ?? 0;
+  const displayPrice = product.price + priceDelta;
   const discount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
 
   // Related products: same audience, different id, max 4
