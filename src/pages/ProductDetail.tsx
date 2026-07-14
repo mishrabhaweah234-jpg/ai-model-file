@@ -7,16 +7,18 @@ import CartSidebar from '@/components/CartSidebar';
 import AuthModal from '@/components/AuthModal';
 import { useState } from 'react';
 
-const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const defaultSizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { addToBag, setTryOn } = useStore();
-  const [selectedSize, setSelectedSize] = useState('M');
-  const [imageZoomed, setImageZoomed] = useState(false);
-
   const product = products.find(p => p.id === id);
+  const availableSizes = product?.sizes ?? defaultSizes;
+  const availableColors = product?.colors;
+  const [selectedSize, setSelectedSize] = useState(availableSizes[Math.min(2, availableSizes.length - 1)]);
+  const [selectedColorIdx, setSelectedColorIdx] = useState(0);
+  const [imageZoomed, setImageZoomed] = useState(false);
 
   if (!product) {
     return (
