@@ -3,7 +3,7 @@ import { products } from '@/data/products';
 
 const CartSidebar = () => {
   const { bag, cartOpen, setCartOpen, removeFromBag, bagTotal } = useStore();
-  const bagProducts = bag.map(id => products.find(p => p.id === id)).filter(Boolean);
+  const bagItems = bag.map(item => ({ item, product: products.find(p => p.id === item.id) })).filter(x => x.product);
 
   return (
     <>
