@@ -9,6 +9,7 @@ import Help from "./pages/Help.tsx";
 import Terms from "./pages/Terms.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
+import Checkout from "./pages/Checkout.tsx";
 
 const queryClient = new QueryClient();
 
