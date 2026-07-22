@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store/useStore';
 import { products } from '@/data/products';
 
 const CartSidebar = () => {
+  const navigate = useNavigate();
   const { bag, cartOpen, setCartOpen, removeFromBag, bagTotal } = useStore();
   const bagItems = bag.map(item => ({ item, product: products.find(p => p.id === item.id) })).filter(x => x.product);
 
@@ -71,7 +73,13 @@ const CartSidebar = () => {
             <span>Total</span>
             <strong className="text-lg">Rs {bagTotal()}</strong>
           </div>
-          <button className="btn-primary w-full text-sm">Checkout</button>
+          <button
+            onClick={() => { setCartOpen(false); navigate('/checkout'); }}
+            disabled={bagItems.length === 0}
+            className="btn-primary w-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Checkout
+          </button>
         </div>
       </aside>
     </>
