@@ -73,7 +73,13 @@ const CartSidebar = () => {
             <span>Total</span>
             <strong className="text-lg">Rs {bagTotal()}</strong>
           </div>
-          <button className="btn-primary w-full text-sm">Checkout</button>
+          <button
+            onClick={() => { setCartOpen(false); navigate('/checkout'); }}
+            disabled={bagItems.length === 0}
+            className="btn-primary w-full text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Checkout
+          </button>
         </div>
       </aside>
     </>
