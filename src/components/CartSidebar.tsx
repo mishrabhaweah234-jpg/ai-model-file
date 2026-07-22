@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '@/store/useStore';
 import { products } from '@/data/products';
 
 const CartSidebar = () => {
+  const navigate = useNavigate();
   const { bag, cartOpen, setCartOpen, removeFromBag, bagTotal } = useStore();
   const bagItems = bag.map(item => ({ item, product: products.find(p => p.id === item.id) })).filter(x => x.product);
 
