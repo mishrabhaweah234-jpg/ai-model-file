@@ -33,16 +33,33 @@ const CartSidebar = () => {
           ) : (
             bagItems.map(({ item, product: p }, i) => {
               const linePrice = item.price ?? p!.price;
-              const meta = [item.size, item.color].filter(Boolean).join(' · ');
               return (
                 <article key={`${p!.id}-${i}`} className="flex items-center gap-3 glass-surface !rounded-2xl p-3">
-                  <img src={p!.image} alt={p!.name} className="w-12 h-12 rounded-xl flex-shrink-0 object-contain bg-muted/30" loading="lazy" />
+                  <img src={p!.image} alt={p!.name} className="w-14 h-14 rounded-xl flex-shrink-0 object-contain bg-muted/30" loading="lazy" />
                   <div className="flex-1 min-w-0">
                     <strong className="text-sm block truncate">{p!.name}</strong>
-                    <p className="text-xs text-muted-foreground truncate">{p!.brand}{meta ? ` · ${meta}` : ''} · Qty 1</p>
+                    <p className="text-xs text-muted-foreground truncate">{p!.brand} · Qty 1</p>
+                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                      {item.size && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-muted text-foreground">
+                          Size {item.size}
+                        </span>
+                      )}
+                      {item.color && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-muted text-foreground">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full border border-border"
+                            style={{ background: item.colorValue ?? p!.color }}
+                          />
+                          {item.color}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <strong className="text-sm whitespace-nowrap">Rs {linePrice.toLocaleString()}</strong>
-                  <button onClick={() => removeFromBag(i)} className="text-xs text-muted-foreground hover:text-destructive">✕</button>
+                  <div className="flex flex-col items-end gap-1">
+                    <strong className="text-sm whitespace-nowrap">Rs {linePrice.toLocaleString()}</strong>
+                    <button onClick={() => removeFromBag(i)} className="text-xs text-muted-foreground hover:text-destructive">✕</button>
+                  </div>
                 </article>
               );
             })
